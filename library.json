@@ -1,0 +1,34 @@
+{
+    "name": "roo_logging",
+    "description": "Arduino-compliant ligtweight logging library, targeted at ESP32 and related boards. Port of Google's 'glog' library.",
+    "keywords": [
+        "logging",
+    ],
+    "authors": [
+        {
+            "name": "Dawid Kurzyniec",
+            "email": "dawid.kurzyniec@gmail.com",
+            "maintainer": true
+        }
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dejwk/roo_logging"
+    },
+    "version": "1.0.0",
+    "homepage": "https://github.com/dejwk/roo_logging",
+    "frameworks": [
+        "Arduino"
+    ],
+    "build": {
+        "srcDir": "src",
+        "srcFilter": "+<*> -<examples> -<benchmarks> -<doc> -<test>"
+    },
+    "examples": [
+        "examples/**/*.ino"
+    ],
+    "dependencies": {
+        "dejwk/roo_flags": ">0",
+        "dejwk/roo_time": ">0"
+    }
+}
