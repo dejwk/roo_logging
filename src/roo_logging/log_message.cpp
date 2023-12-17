@@ -231,6 +231,7 @@ LogMessage::~LogMessage() {
   //   }
   // #else   // !defined(GLOG_THREAD_LOCAL_STORAGE)
   delete allocated_;
+  allocated_ = nullptr;
   // #endif  // defined(GLOG_THREAD_LOCAL_STORAGE)
 }
 
