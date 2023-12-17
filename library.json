@@ -2,7 +2,7 @@
     "name": "roo_logging",
     "description": "Arduino-compliant ligtweight logging library, targeted at ESP32 and related boards. Port of Google's 'glog' library.",
     "keywords": [
-        "logging",
+        "logging"
     ],
     "authors": [
         {
