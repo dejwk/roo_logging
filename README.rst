@@ -1,10 +1,12 @@
 roo_logging Library
 ======================
 
-roo_logging is a C++14 library that implements application-level logging for
+roo_logging is a lightweight C++14 library that implements application-level logging for
 Arduino systems. The library provides logging APIs based on C++-style streams and
 various helper macros.
 
+The library will add only ~6 KB to your binary size. Debug-only logging can be completely
+optimized away in release builds.
 
 Getting Started
 ---------------
@@ -152,6 +154,8 @@ excessive logging.
    DLOG_IF(INFO, num_cookies > 10) << "Got lots of cookies";
    DLOG_EVERY_N(INFO, 10) << "Got the " << roo_logging::COUNTER << "th cookie";
 
+To disable debug mode, define NDEBUG macro. For example, if using PlatformIO,
+add ``build_flags = -DNDEBUG`` to your configuration.
 
 ``CHECK`` Macros
 ~~~~~~~~~~~~~~~~
