@@ -1,3 +1,5 @@
+#pragma once
+
 #include <Arduino.h>
 #include <inttypes.h>
 
@@ -181,7 +183,7 @@
 #define LOG(severity) COMPACT_ROO_LOG_##severity.stream()
 
 #define LOG_IF(severity, condition) \
-  !(condition) ? (void)0 : roo_logging::LogMessageVoidify() & LOG(severity)
+  !(condition) ? (void)0 : ::roo_logging::LogMessageVoidify() & LOG(severity)
 
 #define LOG_ASSERT(condition) \
   LOG_IF(FATAL, !(condition)) << "Assert failed: " #condition

@@ -150,29 +150,30 @@ DEFINE_CHECK_OP_IMPL(Check_GT, >)
 // in the macro.
 typedef ::String _Check_string;
 
-#define CHECK_OP_LOG(name, op, val1, val2, log)                                \
-  while (roo_logging::_Check_string* _result = roo_logging::Check##name##Impl( \
-             roo_logging::GetReferenceableValue(val1),                         \
-             roo_logging::GetReferenceableValue(val2),                         \
-             #val1 " " #op " " #val2))                                         \
+#define CHECK_OP_LOG(name, op, val1, val2, log)              \
+  while (::roo_logging::_Check_string* _result =             \
+             roo_logging::Check##name##Impl(                 \
+                 ::roo_logging::GetReferenceableValue(val1), \
+                 ::roo_logging::GetReferenceableValue(val2), \
+                 #val1 " " #op " " #val2))                   \
   log(__FILE__, __LINE__, roo_logging::CheckOpString(_result)).stream()
 #else
 // In optimized mode, use CheckOpString to hint to compiler that
 // the while condition is unlikely.
 #define CHECK_OP_LOG(name, op, val1, val2, log)                               \
   while (roo_logging::CheckOpString _result = roo_logging::Check##name##Impl( \
-             roo_logging::GetReferenceableValue(val1),                        \
-             roo_logging::GetReferenceableValue(val2),                        \
+             ::roo_logging::GetReferenceableValue(val1),                      \
+             ::roo_logging::GetReferenceableValue(val2),                      \
              #val1 " " #op " " #val2))                                        \
   log(__FILE__, __LINE__, _result).stream()
 #endif  // STATIC_ANALYSIS, DCHECK_IS_ON()
 
 #if ROO_STRIP_LOG <= 3
 #define CHECK_OP(name, op, val1, val2) \
-  CHECK_OP_LOG(name, op, val1, val2, roo_logging::LogMessageFatal)
+  CHECK_OP_LOG(name, op, val1, val2, ::roo_logging::LogMessageFatal)
 #else
 #define CHECK_OP(name, op, val1, val2) \
-  CHECK_OP_LOG(name, op, val1, val2, roo_logging::NullStreamFatal)
+  CHECK_OP_LOG(name, op, val1, val2, ::roo_logging::NullStreamFatal)
 #endif  // STRIP_LOG <= 3
 
 // Helper functions for string comparisons.
@@ -188,10 +189,10 @@ DECLARE_CHECK_STROP_IMPL(strcasecmp, false)
 
 // Helper macro for string comparisons.
 // Don't use this macro directly in your code, use CHECK_STREQ et al below.
-#define CHECK_STROP(func, op, expected, s1, s2)             \
-  while (GOOGLE_NAMESPACE::CheckOpString _result =          \
-             GOOGLE_NAMESPACE::Check##func##expected##Impl( \
-                 (s1), (s2), #s1 " " #op " " #s2))          \
+#define CHECK_STROP(func, op, expected, s1, s2)                               \
+  while (::roo_logging::CheckOpString _result =                               \
+             ::roo_logging::Check##func##expected##Impl((s1), (s2),           \
+                                                        #s1 " " #op " " #s2)) \
   LOG(FATAL) << *_result.str_
 
 }  // namespace roo_logging
