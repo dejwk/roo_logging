@@ -162,6 +162,11 @@ inline DefaultLogStream& operator<<(DefaultLogStream& os,
   return os;
 }
 
+inline DefaultLogStream& operator<<(DefaultLogStream& os, const void* ptr) {
+  os.printf("%p", ptr);
+  return os;
+}
+
 class OStringStream : public DefaultLogStream {
  public:
   OStringStream() : DefaultLogStream(val_, kMaxLogMessageLen) {}
