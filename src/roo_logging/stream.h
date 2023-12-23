@@ -140,6 +140,16 @@ inline DefaultLogStream& operator<<(DefaultLogStream& s, unsigned long val) {
   return s;
 }
 
+inline DefaultLogStream& operator<<(DefaultLogStream& s, float val) {
+  s.printf("%f", val);
+  return s;
+}
+
+inline DefaultLogStream& operator<<(DefaultLogStream& s, double val) {
+  s.printf("%d", val);
+  return s;
+}
+
 inline DefaultLogStream& operator<<(DefaultLogStream& s,
                                     unsigned long long val) {
   s.print(val, s.number_base());
