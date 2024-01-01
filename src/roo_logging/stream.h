@@ -230,16 +230,10 @@ class NullStreamFatal : public NullStream {
   __attribute__((noreturn)) ~NullStreamFatal() throw() { exit(1); }
 };
 
+// Captures anything that resembles a string.
 template <typename Str, typename CStr = decltype(std::declval<Str>().c_str()),
           typename Size = decltype(std::declval<Str>().size())>
-DefaultLogStream& operator<<(DefaultLogStream& s, const Str& val) = delete;
-
-}  // namespace roo_logging
-
-// Captures anything that resembles a string.
-template <typename Str, const char*, size_t>
-roo_logging::DefaultLogStream& operator<<(roo_logging::DefaultLogStream& s,
-                                          const Str& val) {
+DefaultLogStream& operator<<(DefaultLogStream& s, const Str& val) {
   size_t len = val.size();
   size_t cap = s.remaining_capacity();
   if (len > cap) len = cap;
@@ -247,6 +241,21 @@ roo_logging::DefaultLogStream& operator<<(roo_logging::DefaultLogStream& s,
   s.pos_ += len;
   return s;
 }
+
+// Captures anything that resembles a string_view.
+template <typename Str, typename dummy = int,
+          typename CStr = decltype(std::declval<Str>().data()),
+          typename Size = decltype(std::declval<Str>().size())>
+DefaultLogStream& operator<<(DefaultLogStream& s, const Str& val) {
+  size_t len = val.size();
+  size_t cap = s.remaining_capacity();
+  if (len > cap) len = cap;
+  memcpy(&s.buf_[s.pos_], val.data(), len);
+  s.pos_ += len;
+  return s;
+}
+
+}  // namespace roo_logging
 
 roo_logging::DefaultLogStream& operator<<(roo_logging::DefaultLogStream& s,
                                           const String& val);
