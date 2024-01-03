@@ -231,20 +231,7 @@ class NullStreamFatal : public NullStream {
 };
 
 // Captures anything that resembles a string.
-template <typename Str, typename CStr = decltype(std::declval<Str>().c_str()),
-          typename Size = decltype(std::declval<Str>().size())>
-DefaultLogStream& operator<<(DefaultLogStream& s, const Str& val) {
-  size_t len = val.size();
-  size_t cap = s.remaining_capacity();
-  if (len > cap) len = cap;
-  memcpy(&s.buf_[s.pos_], val.c_str(), len);
-  s.pos_ += len;
-  return s;
-}
-
-// Captures anything that resembles a string_view.
-template <typename Str, typename dummy = int,
-          typename CStr = decltype(std::declval<Str>().data()),
+template <typename Str, typename Data = decltype(std::declval<Str>().data()),
           typename Size = decltype(std::declval<Str>().size())>
 DefaultLogStream& operator<<(DefaultLogStream& s, const Str& val) {
   size_t len = val.size();
