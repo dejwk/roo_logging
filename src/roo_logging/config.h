@@ -45,9 +45,9 @@ ROO_DECLARE_FLAG(uint8_t, roo_logging_minloglevel);
 #endif
 
 #if defined(VLOG_LEVEL)
-#define VLOG_IS_ON(level) ((level) >= VLOG_LEVEL)
+#define VLOG_IS_ON(verboselevel) ((verboselevel) >= VLOG_LEVEL)
 #else
-#define VLOG_IS_ON(level) 0
+#define VLOG_IS_ON(verboselevel) 0
 #endif
 
 #if !defined(ROO_LOGGING_HAVE_SYMBOLIZE)
