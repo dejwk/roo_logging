@@ -7,6 +7,7 @@
 
 #include "roo_logging/base.h"
 #include "roo_logging/check.h"
+#include "roo_logging/config.h"
 #include "roo_logging/exit.h"
 #include "roo_logging/log_message.h"
 #include "roo_logging/log_severity.h"
@@ -53,13 +54,6 @@
 //   LOG_FIRST_N(INFO, 20) << "Got the " << roo_logging::COUNTER << "th cookie";
 //
 // Outputs log messages for the first 20 times it is executed.
-//
-// Analogous SYSLOG, SYSLOG_IF, and SYSLOG_EVERY_N macros are available.
-// These log to syslog as well as to the normal logs.  If you use these at
-// all, you need to be aware that syslog can drastically reduce performance,
-// especially if it is configured for remote logging!  Don't use these
-// unless you fully understand this and have a concrete need to use them.
-// Even then, try to minimize your use of them.
 //
 // There are also "debug mode" logging macros like the ones above:
 //
@@ -246,7 +240,7 @@
 #define CHECK_DOUBLE_EQ(val1, val2)                \
   do {                                             \
     CHECK_LE((val1), (val2) + 0.000000000000001L); \
-    CHECK_GE((val1), (val2)-0.000000000000001L);   \
+    CHECK_GE((val1), (val2) - 0.000000000000001L); \
   } while (0)
 
 #define CHECK_NEAR(val1, val2, margin)   \
