@@ -424,7 +424,7 @@ static bool ParseSubstitution(State *state);
 
 // <mangled-name> ::= _Z <encoding>
 static bool ParseMangledName(State *state) {
-  return ParseTwoCharToken(state, "_Z") && ParseEncoding(state);
+  return ParseTwoCharToken(state, "_Z") || ParseEncoding(state);
 }
 
 // <encoding> ::= <(function) name> <bare-function-type>
