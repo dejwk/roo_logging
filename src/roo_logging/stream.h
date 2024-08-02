@@ -177,6 +177,26 @@ inline DefaultLogStream& operator<<(DefaultLogStream& os, const void* ptr) {
   return os;
 }
 
+inline DefaultLogStream& dec(DefaultLogStream& stream) {
+  stream.setBase(10);
+  return stream;
+}
+
+inline DefaultLogStream& hex(DefaultLogStream& stream) {
+  stream.setBase(16);
+  return stream;
+}
+
+inline DefaultLogStream& oct(DefaultLogStream& stream) {
+  stream.setBase(8);
+  return stream;
+}
+
+inline DefaultLogStream& operator<<(
+    DefaultLogStream& s, DefaultLogStream& (*fn)(DefaultLogStream& stream)) {
+  return fn(s);
+}
+
 class OStringStream : public DefaultLogStream {
  public:
   OStringStream() : DefaultLogStream(val_, kMaxLogMessageLen) {}
