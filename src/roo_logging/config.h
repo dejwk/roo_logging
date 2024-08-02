@@ -44,6 +44,12 @@ ROO_DECLARE_FLAG(uint8_t, roo_logging_minloglevel);
 #define DCHECK_IS_ON() 1
 #endif
 
+#if defined(VLOG_LEVEL)
+#define VLOG_IS_ON(level) ((level) >= VLOG_LEVEL)
+#else
+#define VLOG_IS_ON(level) 0
+#endif
+
 #if !defined(ROO_LOGGING_HAVE_SYMBOLIZE)
 // For emulation on Linux.
 #if defined(__linux__)
