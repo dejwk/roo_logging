@@ -241,6 +241,136 @@ The ``CHECK_DOUBLE_EQ`` macro checks the equality of two floating point
 values, accepting a small error margin. ``CHECK_NEAR`` accepts a third
 floating point argument, which specifies the acceptable error margin.
 
+Verbose Logging
+~~~~~~~~~~~~~~~
+
+When you are chasing difficult bugs, thorough log messages are very useful.
+However, you may want to ignore too verbose messages in usual development. For
+such verbose logging, roo_logging provides the ``VLOG`` macro, which allows you to
+define your own numeric logging levels. The :cmd:`VLOG_LEVEL` macro
+controls which verbose messages are logged:
+
+.. code:: cpp
+
+   VLOG(1) << "I’m printed when you run the program with VLOG_LEVEL=1 or higher";
+   VLOG(2) << "I’m printed when you run the program with VLOG_LEVEL=2 or higher";
+
+With ``VLOG``, the lower the verbose level, the more likely messages are to be
+logged. For example, if :cmd:`VLOG_LEVEL=1`, ``VLOG(1)`` will log, but ``VLOG(2)``
+will not log.
+
+.. pull-quote::
+   [!CAUTION]
+
+   The ``VLOG`` behavior is opposite of the severity level logging, where
+   ``INFO``, ``ERROR``, etc. are defined in increasing order and thus
+   :cmd:`roo_logging_minloglevel` of 1 will only log ``WARNING`` and above.
+
+Though you can specify any integers for both ``VLOG`` macro and :cmd:`VLOG_LEVEL` flag,
+the common values for them are small positive integers. For example, if you
+write ``VLOG(0)``, you should specify :cmd:`VLOG_LEVEL=-1` or lower to silence it. This
+is less useful since we may not want verbose logs by default in most cases. The
+``VLOG`` macros always log at the ``INFO`` log level (when they log at all).
+
+There’s also ``VLOG_IS_ON(n)`` "verbose level" condition macro. This macro
+returns ``true`` when the :cmd:`VLOG_LEVEL` is equal to or greater than ``n``. The
+macro can be used as follows:
+
+.. code:: cpp
+
+   if (VLOG_IS_ON(2)) {
+       // do some logging preparation and logging
+       // that can’t be accomplished with just VLOG(2) << ...;
+   }
+
+Verbose level condition macros ``VLOG_IF``, ``VLOG_EVERY_N`` and
+``VLOG_IF_EVERY_N`` behave analogous to ``LOG_IF``, ``LOG_EVERY_N``,
+``LOG_IF_EVERY_N``, but accept a numeric verbosity level as opposed to a
+severity level.
+
+.. code:: cpp
+
+   VLOG_IF(1, (size > 1024))
+      << "I’m printed when size is more than 1024 and when you run the "
+         "program with --v=1 or more";
+   VLOG_EVERY_N(1, 10)
+      << "I’m printed every 10th occurrence, and when you run the program "
+         "with --v=1 or more. Present occurrence is " << google::COUNTER;
+   VLOG_IF_EVERY_N(1, (size > 1024), 10)
+      << "I’m printed on every 10th occurrence of case when size is more "
+         " than 1024, when you run the program with --v=1 or more. ";
+         "Present occurrence is " << google::COUNTER;
+
+
+Verbose per-module Logging
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you are developing a library, you may want to give your users (or yourself) the
+ability to debug the behavior of your library through conditionally enabled verbose logs,
+that do not interfere with logs emitted by other libraries or the user program. This can
+be done using ``MLOG`` macros:
+
+.. code:: cpp
+
+   MLOG(my_library) << "Only logged if MLOG_my_library is defined and > 0"
+
+and also, requiring that you put this snippet in your library's header file, to make sure
+that specifying module logging macros is optional:
+
+.. code:: cpp
+
+   #if !defined(MLOG_my_library)
+   #define MLOG_my_library 0
+   #endif
+
+The logging can then be conditionally enabled by adding ``-DMLOG_my_library=1`` to the build
+flags (for example, in the platformio.ini file, if you are using PlatformIO).
+
+For simple libraries, it is recommended that you use your library name as the module name.
+
+For more complex libraries, you may want to define several independent logging modules, so
+that various aspects of the library can be independently debugged. In such cases, use your
+library name as a prefix of all these module names.
+
+By cleverly using macro definitions in your library's header file, you can define dependencies
+between your logging modules. For example, you can emulate the verbose logging levels of VLOG,
+by making your module names hierarchical:
+
+.. code:: cpp
+
+   #if !defined(MLOG_my_library_loglevel)
+   #define MLOG_my_library_loglevel 0
+   #endif
+
+   #define MLOG_my_library_2 (MLOG_my_library_loglevel >= 2)
+   #define MLOG_my_library_1 (MLOG_my_library_loglevel >= 1)
+
+And then:
+
+.. code:: cpp
+
+  MLOG(my_library_1) << "Verbose per-module logging at level 1";
+  MLOG(my_library_2) << "Verbose per-module logging at level 2";
+
+With the level controlled by one macro, ``MLOG_my_library_loglevel``.
+
+Verbose module-level condition macros ``MLOG_IF``, ``MLOG_EVERY_N`` and
+``MLOG_IF_EVERY_N`` behave analogous to ``LOG_IF``, ``LOG_EVERY_N``,
+``LOG_IF_EVERY_N``, but accept a module name as opposed to a
+severity level.
+
+.. code:: cpp
+
+   MLOG_IF(my_library, (size > 1024))
+      << "I’m printed when size is more than 1024 and when you complile the "
+         "program with -DMLOG_my_library=1";
+   MLOG_EVERY_N(my_library, 10)
+      << "I’m printed every 10th occurrence, and when you compile the program "
+         "with -DMLOG_my_library=1. Present occurrence is " << google::COUNTER;
+   MLOG_IF_EVERY_N(my_library, (size > 1024), 10)
+      << "I’m printed on every 10th occurrence of case when size is more "
+         " than 1024, when you compile the program with -DMLOG_my_library=1";
+         "Present occurrence is " << google::COUNTER;
 
 Performance of Messages
 ~~~~~~~~~~~~~~~~~~~~~~~
