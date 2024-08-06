@@ -8,6 +8,12 @@ various helper macros.
 The library will add only ~6 KB to your binary size. Debug-only logging can be completely
 optimized away in release builds.
 
+What's new
+---------------
+
+Added support for verbose and per-module logging. You can use per-module logging to add
+conditional debug logging to your own Arduino library.
+
 Getting Started
 ---------------
 
@@ -25,8 +31,6 @@ particular `severity level <#severity-levels>`__>), e.g.,
    }
 
 .. contents:: Table of Contents
-
-
 
 User Guide
 ----------
