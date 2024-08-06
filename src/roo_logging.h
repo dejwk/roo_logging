@@ -80,18 +80,19 @@
 //   VLOG(2) << "I'm printed when you run the program with --v=2 or more";
 //
 // These always log at the INFO log level (when they log at all).
-// The verbose logging can also be turned on module-by-module.  For instance,
-//    --vmodule=mapreduce=2,file=1,gfs*=3 --v=0
-// will cause:
-//   a. VLOG(2) and lower messages to be printed from mapreduce.{h,cc}
-//   b. VLOG(1) and lower messages to be printed from file.{h,cc}
-//   c. VLOG(3) and lower messages to be printed from files prefixed with "gfs"
-//   d. VLOG(0) and lower messages to be printed from elsewhere
 //
-// The wildcarding functionality shown by (c) supports both '*' (match
-// 0 or more characters) and '?' (match any single character) wildcards.
+// Additionally, there are per-module logging macros, useful for conditionally
+// enabling more detailed (INFO-level) logging for individual libraries:
 //
-// There's also VLOG_IS_ON(n) "verbose level" condition macro. To be used as
+//
+//   #ifndef MLOG_my_module
+//   #define MLOG_my_module 0
+//   #endif
+//   // ...
+//   MLOG(my_module) << "Only logged if MLOG_my_module is > 0"
+//
+// There are also VLOG_IS_ON(n) and MLOG_IS_ON(my_module) "verbose level"
+// condition macro. To be used as
 //
 //   if (VLOG_IS_ON(2)) {
 //     // do some logging preparation and logging
@@ -99,8 +100,9 @@
 //   }
 //
 // There are also VLOG_IF, VLOG_EVERY_N and VLOG_IF_EVERY_N "verbose level"
-// condition macros for sample cases, when some extra computation and
-// preparation for logs is not needed.
+// condition macros, as well as the corresponding MLOG_IF, MLOG_EVERY_N, and
+// MLOG_IF_EVERY_N for per-module logging, for simple cases when some extra
+// computation and preparation for logs is not needed.
 //   VLOG_IF(1, (size > 1024))
 //      << "I'm printed when size is more than 1024 and when you run the "
 //         "program with --v=1 or more";
@@ -125,46 +127,6 @@
 // Very important: logging a message at the FATAL severity level causes
 // the program to terminate (after the message is logged).
 //
-// Unless otherwise specified, logs will be written to the filename
-// "<program name>.<hostname>.<user name>.log.<severity level>.", followed
-// by the date, time, and pid (you can't prevent the date, time, and pid
-// from being in the filename).
-//
-// The logging code takes two flags:
-//     --v=#           set the verbose level
-//     --logtostderr   log all the messages to stderr instead of to logfiles
-
-// LOG LINE PREFIX FORMAT
-//
-// Log lines have this form:
-//
-//     Lmmdd hh:mm:ss.uuuuuu threadid file:line] msg...
-//
-// where the fields are defined as follows:
-//
-//   L                A single character, representing the log level
-//                    (eg 'I' for INFO)
-//   mm               The month (zero padded; ie May is '05')
-//   dd               The day (zero padded)
-//   hh:mm:ss.uuuuuu  Time in hours, minutes and fractional seconds
-//   threadid         The space-padded thread ID as returned by GetTID()
-//                    (this matches the PID on Linux)
-//   file             The file name
-//   line             The line number
-//   msg              The user-supplied message
-//
-// Example:
-//
-//   I1103 11:57:31.739339 24395 google.cc:2341] Command line: ./some_prog
-//   I1103 11:57:31.739403 24395 google.cc:2342] Process id 24395
-//
-// NOTE: although the microseconds are useful for comparing events on
-// a single machine, clocks on different machines may not be well
-// synchronized.  Hence, use caution when comparing the low bits of
-// timestamps from different machines.
-
-// Log messages below the ROO_STRIP_LOG level will be compiled away for
-// security reasons. See LOG(severtiy) below.
 
 // We use the preprocessor's merging operator, "##", so that, e.g.,
 // LOG(INFO) becomes the token ROO_LOG_INFO.  There's some funny
@@ -381,11 +343,19 @@
 
 // Verbose logging per-module (e.g. switch on/off for individual libraries).
 
-#define __ROO_LOGGING_CAT(a, b) a ## b
+#define __ROO_LOGGING_CAT(a, b) a##b
 #define ROO_LOGGING_CAT(a, b) __ROO_LOGGING_CAT(a, b)
 
 #define MLOG_IS_ON(module) (ROO_LOGGING_CAT(MLOG_, module) > 0)
 #define MLOG(module) LOG_IF(INFO, MLOG_IS_ON(module))
+
+#define MLOG_IF(module, condition) \
+  LOG_IF(INFO, (condition) && MLOG_IS_ON(module))
+
+#define MLOG_EVERY_N(module, n) LOG_IF_EVERY_N(INFO, MLOG_IS_ON(module), n)
+
+#define MLOG_IF_EVERY_N(module, condition, n) \
+  LOG_IF_EVERY_N(INFO, (condition) && MLOG_IS_ON(module), n)
 
 namespace roo_logging {
 
