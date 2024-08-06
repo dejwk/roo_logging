@@ -192,6 +192,11 @@ inline DefaultLogStream& oct(DefaultLogStream& stream) {
   return stream;
 }
 
+inline DefaultLogStream& bin(DefaultLogStream& stream) {
+  stream.setBase(2);
+  return stream;
+}
+
 inline DefaultLogStream& operator<<(
     DefaultLogStream& s, DefaultLogStream& (*fn)(DefaultLogStream& stream)) {
   return fn(s);
