@@ -379,6 +379,14 @@
 #define VLOG_IF_EVERY_N(verboselevel, condition, n) \
   LOG_IF_EVERY_N(INFO, (condition) && VLOG_IS_ON(verboselevel), n)
 
+// Verbose logging per-module (e.g. switch on/off for individual libraries).
+
+#define __ROO_LOGGING_CAT(a, b) a ## b
+#define ROO_LOGGING_CAT(a, b) __ROO_LOGGING_CAT(a, b)
+
+#define MLOG_IS_ON(module) (ROO_LOGGING_CAT(MLOG_, module) > 0)
+#define MLOG(module) LOG_IF(INFO, MLOG_IS_ON(module))
+
 namespace roo_logging {
 
 // A macro alternative of LogAtLevel. New code may want to use this
