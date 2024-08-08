@@ -296,7 +296,7 @@ template <typename C, typename ItrB = decltype(std::declval<C>().begin()),
           typename ItrE = decltype(std::declval<C>().end())>
 inline roo_logging::DefaultLogStream& operator<<(
     roo_logging::DefaultLogStream& s, const C& c) {
-  s << "{";
+  s << "[";
   bool first = true;
   auto i = c.begin();
   while (i != c.end()) {
@@ -306,7 +306,7 @@ inline roo_logging::DefaultLogStream& operator<<(
     first = false;
     s << *i++;
   }
-  s << "}";
+  s << "]";
   return s;
 }
 
