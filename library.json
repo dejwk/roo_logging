@@ -6,8 +6,8 @@
     ],
     "authors": [
         {
-            "name": "Dawid Kurzyniec",
-            "email": "dawid.kurzyniec@gmail.com",
+            "name": "Dejwk",
+            "email": "dejwk.oss@gmail.com",
             "maintainer": true
         }
     ],
@@ -15,7 +15,7 @@
         "type": "git",
         "url": "https://github.com/dejwk/roo_logging"
     },
-    "version": "1.0.4",
+    "version": "1.0.5",
     "homepage": "https://github.com/dejwk/roo_logging",
     "frameworks": [
         "Arduino"
@@ -29,6 +29,6 @@
     ],
     "dependencies": {
         "dejwk/roo_flags": ">0",
-        "dejwk/roo_time": ">0"
+        "dejwk/roo_time": ">=1.0.7"
     }
 }
