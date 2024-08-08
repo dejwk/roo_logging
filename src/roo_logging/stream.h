@@ -141,12 +141,12 @@ inline DefaultLogStream& operator<<(DefaultLogStream& s, unsigned long val) {
 }
 
 inline DefaultLogStream& operator<<(DefaultLogStream& s, float val) {
-  s.printf("%f", val);
+  s.printf("%g", val);
   return s;
 }
 
 inline DefaultLogStream& operator<<(DefaultLogStream& s, double val) {
-  s.printf("%d", val);
+  s.printf("%g", val);
   return s;
 }
 
@@ -162,6 +162,11 @@ inline DefaultLogStream& operator<<(DefaultLogStream& s, const Printable& val) {
 }
 
 DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Uptime uptime);
+
+DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Interval interval);
+
+DefaultLogStream& operator<<(DefaultLogStream& s,
+                             roo_time::Interval::Components interval);
 
 DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::DateTime dt);
 
@@ -255,10 +260,13 @@ class NullStreamFatal : public NullStream {
   __attribute__((noreturn)) ~NullStreamFatal() throw() { exit(1); }
 };
 
-// Captures anything that resembles a string.
-template <typename Str, typename Data = decltype(std::declval<Str>().data()),
-          typename Size = decltype(std::declval<Str>().size())>
-DefaultLogStream& operator<<(DefaultLogStream& s, const Str& val) {
+}  // namespace roo_logging
+
+#if defined(ESP32) || defined(ESP8266) || defined(__linux__)
+#include <string>
+
+inline roo_logging::DefaultLogStream& operator<<(
+    roo_logging::DefaultLogStream& s, const std::string& val) {
   size_t len = val.size();
   size_t cap = s.remaining_capacity();
   if (len > cap) len = cap;
@@ -267,7 +275,40 @@ DefaultLogStream& operator<<(DefaultLogStream& s, const Str& val) {
   return s;
 }
 
-}  // namespace roo_logging
+#if __cplusplus >= 201703L
+#include <string_view>
+
+inline roo_logging::DefaultLogStream& operator<<(
+    roo_logging::DefaultLogStream& s, std::string_view val) {
+  size_t len = val.size();
+  size_t cap = s.remaining_capacity();
+  if (len > cap) len = cap;
+  memcpy(&s.buf_[s.pos_], val.data(), len);
+  s.pos_ += len;
+  return s;
+}
+
+#endif
+#endif
+
+// Logging for iterable collections.
+template <typename C, typename ItrB = decltype(std::declval<C>().begin()),
+          typename ItrE = decltype(std::declval<C>().end())>
+inline roo_logging::DefaultLogStream& operator<<(
+    roo_logging::DefaultLogStream& s, const C& c) {
+  s << "{";
+  bool first = true;
+  auto i = c.begin();
+  while (i != c.end()) {
+    if (!first) {
+      s << ", ";
+    }
+    first = false;
+    s << *i++;
+  }
+  s << "}";
+  return s;
+}
 
 roo_logging::DefaultLogStream& operator<<(roo_logging::DefaultLogStream& s,
                                           const String& val);

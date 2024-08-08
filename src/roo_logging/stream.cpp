@@ -43,10 +43,43 @@ DefaultLogStream& operator<<(DefaultLogStream& s, const char* val) {
 }
 
 DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Uptime uptime) {
-  s.printf("S+%06dd-%02d:%02d:%02d:%06d", (int)(uptime.inHours() / 24),
-           (int)(uptime.inHours() % 24), (int)(uptime.inMinutes() % 60),
-           (int)(uptime.inSeconds() % 60),
-           (int)(uptime.inMicros() % 1000000LL));
+  roo_time::Interval::Components c =
+      (uptime - roo_time::Uptime::Start()).toComponents();
+  s.printf("S%s%06d.%02d:%02d:%02d.%06d", (c.negative ? "-" : "+"), c.days,
+           c.hours, c.minutes, c.seconds, c.micros);
+  return s;
+}
+
+DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Interval interval) {
+  s << interval.toComponents();
+  return s;
+}
+
+DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Interval::Components components) {
+  bool force = false;
+  if (components.negative) s << "-";
+  if (components.days > 0) {
+    s.printf("%d.", components.days);
+    force = true;
+  }
+  if (force || components.hours > 0) {
+    s.printf("%02d:", components.hours);
+    force = true;
+  }
+  if (force || components.minutes > 0) {
+    s.printf("%02d:", components.minutes);
+    force = true;
+  }
+  if (force) {
+    s.printf("%02d", components.seconds);
+  } else {
+    s.printf("%d", components.seconds);
+  }
+  if (components.micros != 0) {
+    uint32_t v = components.micros;
+    while (v % 10 == 0) v /= 10;
+    s.printf(".%d", v);
+  }
   return s;
 }
 
