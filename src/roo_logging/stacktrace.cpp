@@ -123,6 +123,9 @@ void DumpStackTrace(int skip_count, DebugWriter* writerfn, void* arg) {
 #include "sdkconfig.h"
 #include "soc/cpu.h"
 #include "soc/soc_memory_layout.h"
+
+#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2 || \
+    CONFIG_IDF_TARGET_ESP32S3
 #include "xtensa/xtensa_context.h"
 
 namespace roo_logging {
@@ -172,9 +175,13 @@ void DumpStackTrace(int skip_count, DebugWriter* writerfn, void* arg) {
   esp_rom_printf("\r\n\r\n");
 }
 
-//   esp_backtrace_print(200);
-
 }  // namespace roo_logging
+
+#elif CONFIG_IDF_TARGET_ESP32C3
+namespace roo_logging {
+void DumpStackTrace(int skip_count, DebugWriter* writerfn, void* arg) {}
+}  // namespace roo_logging
+#endif
 
 #else
 
