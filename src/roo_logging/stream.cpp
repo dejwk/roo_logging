@@ -45,8 +45,8 @@ DefaultLogStream& operator<<(DefaultLogStream& s, const char* val) {
 DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Uptime uptime) {
   roo_time::Interval::Components c =
       (uptime - roo_time::Uptime::Start()).toComponents();
-  s.printf("S%s%06d.%02d:%02d:%02d.%06d", (c.negative ? "-" : "+"), c.days,
-           c.hours, c.minutes, c.seconds, c.micros);
+  s.printf("S%s%06d.%02d:%02d:%02d.%06d", (c.negative ? "-" : "+"), (int)c.days,
+           (int)c.hours, (int)c.minutes, (int)c.seconds, (int)c.micros);
   return s;
 }
 
