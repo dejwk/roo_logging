@@ -6,7 +6,6 @@ cc_library(
         [
             "src/**/*.cpp",
             "src/**/*.h",
-            "src/**/*.c",
         ],
         exclude = ["test/**"],
     ),
@@ -14,6 +13,6 @@ cc_library(
     deps = [
         "//lib/roo_flags",
         "//lib/roo_time",
-        "//roo_testing/frameworks/arduino-esp32-2.0.4/cores/esp32:main",
+        "//roo_testing/frameworks/arduino-esp32-2.0.4/cores/esp32",
     ]
 )
