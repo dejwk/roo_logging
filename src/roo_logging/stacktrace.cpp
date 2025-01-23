@@ -115,6 +115,10 @@ void DumpStackTrace(int skip_count, DebugWriter* writerfn, void* arg) {
 
 #elif defined(ESP32)
 
+#include "esp_idf_version.h"
+
+#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0)
+
 #include "esp_attr.h"
 #include "esp_debug_helpers.h"
 #include "esp_err.h"
@@ -178,6 +182,12 @@ void DumpStackTrace(int skip_count, DebugWriter* writerfn, void* arg) {
 }  // namespace roo_logging
 
 #elif CONFIG_IDF_TARGET_ESP32C3
+namespace roo_logging {
+void DumpStackTrace(int skip_count, DebugWriter* writerfn, void* arg) {}
+}  // namespace roo_logging
+#endif
+
+#else  // ESP-IDF >= 5.0.0
 namespace roo_logging {
 void DumpStackTrace(int skip_count, DebugWriter* writerfn, void* arg) {}
 }  // namespace roo_logging

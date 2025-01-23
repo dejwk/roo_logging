@@ -59,7 +59,7 @@ DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Interval::Components
   bool force = false;
   if (components.negative) s << "-";
   if (components.days > 0) {
-    s.printf("%d.", components.days);
+    s.printf("%d.", (int)components.days);
     force = true;
   }
   if (force || components.hours > 0) {
