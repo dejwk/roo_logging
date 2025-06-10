@@ -31,7 +31,24 @@
 
 #include "roo_logging/stream.h"
 
+#ifdef ESP32
+#include <stdarg.h>
+#include <stdio.h>
+#endif
+
 namespace roo_logging {
+
+#ifdef ESP32
+// Optimized version of printf.
+size_t DefaultLogStream::printf(const char* format, ...) {
+  va_list arg;
+  va_start(arg, format);
+  int len = vsnprintf(buf_ + pos_, remaining_capacity(), format, arg);
+  va_end(arg);
+  pos_ += len;
+  return len;
+}
+#endif
 
 DefaultLogStream& operator<<(DefaultLogStream& s, const char* val) {
   size_t len = strlen(val);
@@ -55,7 +72,8 @@ DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Interval interval) {
   return s;
 }
 
-DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Interval::Components components) {
+DefaultLogStream& operator<<(DefaultLogStream& s,
+                             roo_time::Interval::Components components) {
   bool force = false;
   if (components.negative) s << "-";
   if (components.days > 0) {

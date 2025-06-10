@@ -79,6 +79,11 @@ class DefaultLogStream : public Print {
     return len;
   }
 
+#ifdef ESP32
+  // Optimized version of printf.
+  size_t printf(const char* format, ...);
+#endif
+
   int number_base() const { return number_base_; }
 
   int pcount() const { return pos_; }
