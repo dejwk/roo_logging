@@ -31,6 +31,10 @@
 
 #include "roo_logging/log_message.h"
 
+#ifdef ESP32
+#include "freertos/task.h"
+#endif
+
 #include "roo_logging/exit.h"
 #include "roo_logging/sink.h"
 #include "roo_logging/stderr.h"
@@ -201,6 +205,12 @@ void LogMessage::Init(const char* file, int line, LogSeverity severity,
       stream() << dt;
       stream().write(' ');
     }
+#ifdef ESP32
+    TaskHandle_t tHandle = xTaskGetCurrentTaskHandle();
+    char* tName = pcTaskGetName(tHandle);
+    stream() << tName << '(' << tHandle << ") ";
+    ;
+#endif
     stream() << data_->basename_ << ":" << data_->line_ << "] ";
   }
   data_->num_prefix_chars_ = data_->stream_.pcount();
@@ -278,9 +288,9 @@ void LogMessage::SendToLog() /*EXCLUSIVE_LOCKS_REQUIRED(log_mutex)*/ {
     MaybeLogToStderr(data_->severity_, data_->message_text_,
                      data_->num_chars_to_log_);
     MaybeLogToSink(data_->severity_, data_->fullname_, data_->basename_,
-               data_->line_, data_->uptime_, data_->walltime_,
-               data_->message_text_ + data_->num_prefix_chars_,
-               (data_->num_chars_to_log_ - data_->num_prefix_chars_ - 1));
+                   data_->line_, data_->uptime_, data_->walltime_,
+                   data_->message_text_ + data_->num_prefix_chars_,
+                   (data_->num_chars_to_log_ - data_->num_prefix_chars_ - 1));
     // NOTE: -1 removes trailing \n
   }
 
