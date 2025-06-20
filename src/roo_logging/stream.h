@@ -79,7 +79,7 @@ class DefaultLogStream : public Print {
     return len;
   }
 
-#ifdef ESP32
+#if (defined(ESP32) || defined(ROO_TESTING))
   // Optimized version of printf.
   size_t printf(const char* format, ...);
 #endif

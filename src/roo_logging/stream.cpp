@@ -31,14 +31,14 @@
 
 #include "roo_logging/stream.h"
 
-#ifdef ESP32
+#if (defined(ESP32) || defined(ROO_TESTING))
 #include <stdarg.h>
 #include <stdio.h>
 #endif
 
 namespace roo_logging {
 
-#ifdef ESP32
+#if (defined(ESP32) || defined(ROO_TESTING))
 // Optimized version of printf.
 size_t DefaultLogStream::printf(const char* format, ...) {
   va_list arg;
