@@ -11,8 +11,8 @@ cc_library(
     ),
     includes = [ "src" ],
     deps = [
-        "//lib/roo_flags",
-        "//lib/roo_time",
-        "//roo_testing/frameworks/arduino-esp32-2.0.4/cores/esp32",
+        "@roo_flags",
+        "@roo_time",
+        "@roo_testing//roo_testing/frameworks/arduino-esp32-2.0.4/cores/esp32",
     ]
 )
