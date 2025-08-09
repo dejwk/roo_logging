@@ -8,7 +8,7 @@ namespace roo_logging {
 // Users should subclass LogSink and override send to do whatever they want.
 class LogSink {
  public:
-  virtual ~LogSink();
+  virtual ~LogSink() = default;
 
   // Sink's logging logic (message_len is such as to exclude '\n' at the end).
   // This method can't use LOG() or CHECK() as logging.
