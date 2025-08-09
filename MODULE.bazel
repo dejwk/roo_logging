@@ -1,0 +1,7 @@
+module(name = "roo_logging", version = "1.2.0")
+
+bazel_dep(name = "googletest", version = "1.17.0")
+bazel_dep(name = "roo_testing", version = "1.1.1")
+
+bazel_dep(name = "roo_flags", version = "1.1.0")
+bazel_dep(name = "roo_time", version = "1.2.1")
