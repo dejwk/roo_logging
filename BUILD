@@ -16,3 +16,18 @@ cc_library(
         "@roo_testing//roo_testing/frameworks/arduino-esp32-2.0.4/cores/esp32",
     ]
 )
+
+cc_test(
+    name = "roo_logging_test",
+    srcs = [
+        "test/roo_logging_test.cpp",
+    ],
+    copts = ["-Iexternal/gtest/include"],
+    includes = ["src"],
+    linkstatic = 1,
+    deps = [
+        ":roo_logging",
+        "@roo_testing//:arduino_gtest_main",
+    ],
+    size = "small",
+)
