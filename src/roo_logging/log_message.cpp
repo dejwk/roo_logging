@@ -31,8 +31,10 @@
 
 #include "roo_logging/log_message.h"
 
-#ifdef ESP32
+#if (defined ESP32)
 #include "freertos/task.h"
+#elif (defined __linux__)
+#include <pthread.h>
 #endif
 
 #include "roo_logging/exit.h"
@@ -205,11 +207,18 @@ void LogMessage::Init(const char* file, int line, LogSeverity severity,
       stream() << dt;
       stream().write(' ');
     }
-#ifdef ESP32
+#if (defined ESP32)
     TaskHandle_t tHandle = xTaskGetCurrentTaskHandle();
     char* tName = pcTaskGetName(tHandle);
     stream() << tName << '(' << tHandle << ") ";
-    ;
+#elif (defined __linux__)
+    {
+      char buf[64];
+      pthread_getname_np(pthread_self(), buf, 64);
+      if (buf[0] != 0) {
+        stream() << buf << " ";
+      }
+    }
 #endif
     stream() << data_->basename_ << ":" << data_->line_ << "] ";
   }
