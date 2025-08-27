@@ -207,7 +207,7 @@ void LogMessage::Init(const char* file, int line, LogSeverity severity,
       stream() << dt;
       stream().write(' ');
     }
-#if (defined ESP32)
+#if (defined ESP32 || defined ROO_TESTING)
     TaskHandle_t tHandle = xTaskGetCurrentTaskHandle();
     char* tName = pcTaskGetName(tHandle);
     stream() << tName << '(' << tHandle << ") ";
