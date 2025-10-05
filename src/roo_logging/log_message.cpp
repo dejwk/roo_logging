@@ -40,6 +40,8 @@
 #include "roo_logging/exit.h"
 #include "roo_logging/sink.h"
 #include "roo_logging/stderr.h"
+#include "roo_threads.h"
+#include "roo_threads/mutex.h"
 
 namespace roo_logging {
 
@@ -51,6 +53,13 @@ void WaitForSinks(LogMessage::LogMessageData* data) {}
 
 // Has the user called SetExitOnDFatal(true)?
 static bool exit_on_dfatal = true;
+
+// A mutex that allows only one thread to log at a time, to keep things from
+// getting jumbled.  Some other very uncommon logging operations (like
+// changing the destination file for log messages of a given severity) also
+// lock this mutex.  Please be sure that anybody who might possibly need to
+// lock it does so.
+static roo::mutex log_mutex;
 
 // Number of messages sent at each severity.  Under log_mutex.
 int64_t num_messages_[NUM_SEVERITIES] = {0, 0, 0, 0};
@@ -272,14 +281,14 @@ void LogMessage::Flush() {
     data_->message_text_[data_->num_chars_to_log_++] = '\n';
   }
 
-  //   // Prevent any subtle race conditions by wrapping a mutex lock around
-  //   // the actual logging action per se.
-  //   {
-  //     MutexLock l(&log_mutex);
-  (this->*(data_->send_method_))();
-  ++num_messages_[static_cast<int>(data_->severity_)];
-  //   }
-  //   LogDestination::WaitForSinks(data_);
+  // Prevent any subtle race conditions by wrapping a mutex lock around
+  // the actual logging action per se.
+  {
+    roo::lock_guard<roo::mutex> l{log_mutex};
+    (this->*(data_->send_method_))();
+    ++num_messages_[static_cast<int>(data_->severity_)];
+  }
+  // LogDestination::WaitForSinks(data_);
 
   // Note that this message is now safely logged.  If we're asked to flush
   // again, as a result of destruction, say, we'll do nothing on future calls.
@@ -314,14 +323,6 @@ void LogMessage::SendToLog() /*EXCLUSIVE_LOCKS_REQUIRED(log_mutex)*/ {
     //   "", 0);
     //   // }
     // }
-
-    // // release the lock that our caller (directly or indirectly)
-    // // LogMessage::~LogMessage() grabbed so that signal handlers
-    // // can use the logging facility. Alternately, we could add
-    // // an entire unsafe logging interface to bypass locking
-    // // for signal handlers but this seems simpler.
-    // log_mutex.Unlock();
-
     WaitForSinks(data_);
 
     const char* message = "*** Check failure stack trace: ***\n";
