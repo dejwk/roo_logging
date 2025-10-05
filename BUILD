@@ -13,6 +13,7 @@ cc_library(
     deps = [
         "@roo_flags",
         "@roo_time",
+        "@roo_threads",
         "@roo_testing//roo_testing/frameworks/arduino-esp32-2.0.4/cores/esp32",
     ]
 )
