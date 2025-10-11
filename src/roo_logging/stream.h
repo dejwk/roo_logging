@@ -168,10 +168,10 @@ inline DefaultLogStream& operator<<(DefaultLogStream& s, const Printable& val) {
 
 DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Uptime uptime);
 
-DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Interval interval);
+DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Duration interval);
 
 DefaultLogStream& operator<<(DefaultLogStream& s,
-                             roo_time::Interval::Components interval);
+                             roo_time::Duration::Components interval);
 
 DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::DateTime dt);
 

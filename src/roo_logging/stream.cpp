@@ -60,20 +60,20 @@ DefaultLogStream& operator<<(DefaultLogStream& s, const char* val) {
 }
 
 DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Uptime uptime) {
-  roo_time::Interval::Components c =
+  roo_time::Duration::Components c =
       (uptime - roo_time::Uptime::Start()).toComponents();
   s.printf("S%s%06d.%02d:%02d:%02d.%06d", (c.negative ? "-" : "+"), (int)c.days,
            (int)c.hours, (int)c.minutes, (int)c.seconds, (int)c.micros);
   return s;
 }
 
-DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Interval interval) {
+DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Duration interval) {
   s << interval.toComponents();
   return s;
 }
 
 DefaultLogStream& operator<<(DefaultLogStream& s,
-                             roo_time::Interval::Components components) {
+                             roo_time::Duration::Components components) {
   bool force = false;
   if (components.negative) s << "-";
   if (components.days > 0) {

@@ -145,7 +145,7 @@
       .stream()
 
 #define SOME_KIND_OF_LOG_EVERY_T(severity, interval)                          \
-  constexpr roo_time::Interval LOG_TIME_PERIOD =                              \
+  constexpr roo_time::Duration LOG_TIME_PERIOD =                              \
       ::roo_time::Seconds(interval);                                          \
   static roo_time::Uptime LOG_PREVIOUS_TIME = roo_time::Uptime();             \
   const roo_time::Uptime LOG_CURRENT_TIME = roo_time::Uptime::Now();          \
