@@ -37,6 +37,10 @@
 #include "roo_logging/config.h"
 #include "roo_logging/log_severity.h"
 
+#if (defined ESP32 || defined ROO_LOGGING)
+#include "rom/ets_sys.h"
+#endif
+
 namespace roo_logging {
 namespace {
 
@@ -44,6 +48,13 @@ void ColoredWriteToStderr(LogSeverity severity, const char* message,
                           size_t len) {
   bool coloring = GET_ROO_FLAG(roo_logging_colorlogtostderr);
   LogColor color = coloring ? SeverityToColor(severity) : COLOR_DEFAULT;
+#if (defined ESP32 || defined ROO_LOGGING)
+  if (color == COLOR_DEFAULT) {
+    ets_printf(message);
+  } else {
+    ets_printf("\033[0;3%sm%s\033[m", GetAnsiColorCode(color), message);
+  }
+#else
   if (color == COLOR_DEFAULT) {
     fwrite(message, len, 1, stderr);
     return;
@@ -52,7 +63,9 @@ void ColoredWriteToStderr(LogSeverity severity, const char* message,
   fprintf(stderr, "\033[0;3%sm", GetAnsiColorCode(color));
   fwrite(message, len, 1, stderr);
   fprintf(stderr, "\033[m");  // Resets the terminal to default.
+#endif
 }
+
 }  // namespace
 
 // Take a log message of a particular severity and log it to stderr

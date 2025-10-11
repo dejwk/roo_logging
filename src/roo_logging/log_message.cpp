@@ -303,6 +303,7 @@ void LogMessage::SendToLog() /*EXCLUSIVE_LOCKS_REQUIRED(log_mutex)*/ {
     // LogToAllLogfiles(data_->severity_, data_->timestamp_,
     // data_->message_text_,
     //                  data_->num_chars_to_log_);
+    data_->message_text_[data_->num_chars_to_log_] = '\0';
     MaybeLogToStderr(data_->severity_, data_->message_text_,
                      data_->num_chars_to_log_);
     MaybeLogToSink(data_->severity_, data_->fullname_, data_->basename_,
