@@ -59,7 +59,14 @@ static bool exit_on_dfatal = true;
 // changing the destination file for log messages of a given severity) also
 // lock this mutex.  Please be sure that anybody who might possibly need to
 // lock it does so.
-static roo::mutex log_mutex;
+//
+// Using a function, to make sure that the mutex is initialized even if
+// LOG(INFO) gets called from a static initializer itself. (Otherwise, there's
+// undefined initialization order).
+static roo::mutex& log_mutex() {
+  static roo::mutex m;
+  return m;
+};
 
 // Number of messages sent at each severity.  Under log_mutex.
 int64_t num_messages_[NUM_SEVERITIES] = {0, 0, 0, 0};
@@ -218,8 +225,11 @@ void LogMessage::Init(const char* file, int line, LogSeverity severity,
     }
 #if (defined ESP32 || defined ROO_TESTING)
     TaskHandle_t tHandle = xTaskGetCurrentTaskHandle();
-    char* tName = pcTaskGetName(tHandle);
-    stream() << tName << '(' << tHandle << ") ";
+    // Can be null if called from a static initializer.
+    if (tHandle != nullptr) {
+      char* tName = pcTaskGetName(tHandle);
+      stream() << tName << '(' << tHandle << ") ";
+    }
 #elif (defined __linux__)
     {
       char buf[64];
@@ -284,7 +294,7 @@ void LogMessage::Flush() {
   // Prevent any subtle race conditions by wrapping a mutex lock around
   // the actual logging action per se.
   {
-    roo::lock_guard<roo::mutex> l{log_mutex};
+    roo::lock_guard<roo::mutex> l{log_mutex()};
     (this->*(data_->send_method_))();
     ++num_messages_[static_cast<int>(data_->severity_)];
   }

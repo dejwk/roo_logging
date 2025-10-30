@@ -1,12 +1,18 @@
 #include "roo_logging.h"
 
 #include "gtest/gtest.h"
-#include "roo_logging.h"
 #include "roo_logging/sink.h"
 
 // Helper to capture log output.
 #include <sstream>
 #include <string>
+
+struct StaticLogTest {
+  StaticLogTest() {
+    LOG(INFO) << "Foo";
+  }
+} static_test;
+
 class LogCapture : public roo_logging::LogSink {
  public:
   LogCapture() { roo_logging::SetSink(this); }
