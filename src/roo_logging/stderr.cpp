@@ -37,10 +37,6 @@
 #include "roo_logging/config.h"
 #include "roo_logging/log_severity.h"
 
-#if (defined ESP32 || defined ROO_LOGGING)
-#include "rom/ets_sys.h"
-#endif
-
 namespace roo_logging {
 namespace {
 
@@ -48,22 +44,17 @@ void ColoredWriteToStderr(LogSeverity severity, const char* message,
                           size_t len) {
   bool coloring = GET_ROO_FLAG(roo_logging_colorlogtostderr);
   LogColor color = coloring ? SeverityToColor(severity) : COLOR_DEFAULT;
-#if (defined ESP32 || defined ROO_LOGGING)
-  if (color == COLOR_DEFAULT) {
-    ets_printf(message);
-  } else {
-    ets_printf("\033[0;3%sm%s\033[m", GetAnsiColorCode(color), message);
-  }
-#else
+  // Note: not using ets_printf, because it assumes UART0, which doesn't
+  // work well with JTAG debugging which sends stderr over USB.
   if (color == COLOR_DEFAULT) {
     fwrite(message, len, 1, stderr);
     return;
   }
-
-  fprintf(stderr, "\033[0;3%sm", GetAnsiColorCode(color));
+  fwrite("\033[0;3", 5, 1, stderr);
+  fwrite(GetAnsiColorCode(color), 1, 1, stderr);
+  fwrite("m", 1, 1, stderr);
   fwrite(message, len, 1, stderr);
-  fprintf(stderr, "\033[m");  // Resets the terminal to default.
-#endif
+  fwrite("\033[m", 3, 1, stderr);  // Resets the terminal to default.
 }
 
 }  // namespace
