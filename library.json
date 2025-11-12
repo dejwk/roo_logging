@@ -15,7 +15,7 @@
         "type": "git",
         "url": "https://github.com/dejwk/roo_logging"
     },
-    "version": "1.4.2",
+    "version": "1.4.3",
     "homepage": "https://github.com/dejwk/roo_logging",
     "frameworks": [
         "Arduino"
@@ -29,7 +29,7 @@
     ],
     "dependencies": {
         "dejwk/roo_flags": ">=1.1.1",
-        "dejwk/roo_time": ">=1.3.2",
-        "dejwk/roo_threads": ">=1.1.5"
+        "dejwk/roo_time": ">=1.3.3",
+        "dejwk/roo_threads": ">=1.1.6"
     }
 }
