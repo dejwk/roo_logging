@@ -37,6 +37,7 @@
 
 namespace roo_logging {
 
-void MaybeLogToStderr(LogSeverity severity, const char* message, size_t len);
+void MaybeLogToStderr(LogSeverity severity, const char* message, size_t len,
+                      bool from_static_initializer);
 
 }  // namespace roo_logging

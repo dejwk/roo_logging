@@ -107,10 +107,11 @@ struct LogMessage::LogMessageData {
   size_t num_prefix_chars_;      // # of chars of prefix in this message
   size_t num_chars_to_log_;      // # of chars of msg to send to log
   //   size_t num_chars_to_syslog_;  // # of chars of msg to send to syslog
-  const char* basename_;   // basename of file that called LOG
-  const char* fullname_;   // fullname of file that called LOG
-  bool has_been_flushed_;  // false => data has not been flushed
-  bool first_fatal_;       // true => this was first fatal msg
+  const char* basename_;          // basename of file that called LOG
+  const char* fullname_;          // fullname of file that called LOG
+  bool has_been_flushed_;         // false => data has not been flushed
+  bool first_fatal_;              // true => this was first fatal msg
+  bool from_static_initializer_;  // true => logging before main()
 
  private:
   LogMessageData(const LogMessageData&);
@@ -210,6 +211,7 @@ void LogMessage::Init(const char* file, int line, LogSeverity severity,
   data_->basename_ = const_basename(file);
   data_->fullname_ = file;
   data_->has_been_flushed_ = false;
+  data_->from_static_initializer_ = false;
 
   if (GET_ROO_FLAG(roo_logging_prefix)) {
     stream() << LogSeverityNames[severity][0];
@@ -223,12 +225,14 @@ void LogMessage::Init(const char* file, int line, LogSeverity severity,
       stream() << dt;
       stream().write(' ');
     }
-#if (defined ESP32 || defined ROO_TESTING)
+#if (defined ESP_PLATFORM || defined ROO_TESTING)
     TaskHandle_t tHandle = xTaskGetCurrentTaskHandle();
     // Can be null if called from a static initializer.
     if (tHandle != nullptr) {
       char* tName = pcTaskGetName(tHandle);
       stream() << tName << '(' << tHandle << ") ";
+    } else {
+      data_->from_static_initializer_ = true;
     }
 #elif (defined __linux__)
     {
@@ -236,6 +240,8 @@ void LogMessage::Init(const char* file, int line, LogSeverity severity,
       pthread_getname_np(pthread_self(), buf, 64);
       if (buf[0] != 0) {
         stream() << buf << " ";
+      } else {
+        data_->static_initializer_ = true;
       }
     }
 #endif
@@ -315,7 +321,7 @@ void LogMessage::SendToLog() /*EXCLUSIVE_LOCKS_REQUIRED(log_mutex)*/ {
     //                  data_->num_chars_to_log_);
     data_->message_text_[data_->num_chars_to_log_] = '\0';
     MaybeLogToStderr(data_->severity_, data_->message_text_,
-                     data_->num_chars_to_log_);
+                     data_->num_chars_to_log_, data_->from_static_initializer_);
     MaybeLogToSink(data_->severity_, data_->fullname_, data_->basename_,
                    data_->line_, data_->uptime_, data_->walltime_,
                    data_->message_text_ + data_->num_prefix_chars_,

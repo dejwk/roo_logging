@@ -37,19 +37,38 @@
 #include "roo_logging/config.h"
 #include "roo_logging/log_severity.h"
 
+#if defined(ESP_PLATFORM)
+#include "rom/ets_sys.h"
+#endif
+
 namespace roo_logging {
 namespace {
 
-void ColoredWriteToStderr(LogSeverity severity, const char* message,
-                          size_t len) {
+void ColoredWriteToStderr(LogSeverity severity, const char* message, size_t len,
+                          bool from_static_initializer) {
   bool coloring = GET_ROO_FLAG(roo_logging_colorlogtostderr);
   LogColor color = coloring ? SeverityToColor(severity) : COLOR_DEFAULT;
-  // Note: not using ets_printf, because it assumes UART0, which doesn't
-  // work well with JTAG debugging which sends stderr over USB.
   if (color == COLOR_DEFAULT) {
+#if (defined ESP_PLATFORM)
+    if (from_static_initializer) {
+      // stderr might not yet be initialized. Write directly to UART.
+      ets_printf("%s", message);
+      return;
+    }
+#endif
+    // Not using ets_printf in general, because it assumes UART0, which doesn't
+    // work well with JTAG debugging which sends stderr over USB.
     fwrite(message, len, 1, stderr);
     return;
   }
+#if (defined ESP_PLATFORM)
+  if (from_static_initializer) {
+    // stderr might not yet be initialized. Write directly to UART.
+    ets_printf("\033[0;3%sm%s\033[m", GetAnsiColorCode(color), message);
+    return;
+  }
+#endif
+
   fwrite("\033[0;3", 5, 1, stderr);
   fwrite(GetAnsiColorCode(color), 1, 1, stderr);
   fwrite("m", 1, 1, stderr);
@@ -61,10 +80,11 @@ void ColoredWriteToStderr(LogSeverity severity, const char* message,
 
 // Take a log message of a particular severity and log it to stderr
 // iff it's of a high enough severity to deserve it.
-void MaybeLogToStderr(LogSeverity severity, const char* message, size_t len) {
+void MaybeLogToStderr(LogSeverity severity, const char* message, size_t len,
+                      bool from_static_initializer) {
   //   if ((severity >= GET_ROO_FLAG(stderrthreshold)) ||
   //   GET_ROO_FLAG(alsologtostderr)) {
-  ColoredWriteToStderr(severity, message, len);
+  ColoredWriteToStderr(severity, message, len, from_static_initializer);
 }
 
 }  // namespace roo_logging
