@@ -31,6 +31,7 @@
 
 #include "roo_logging/symbolize.h"
 
+#include <cstdlib>
 #include <cstring>
 #include <limits>
 

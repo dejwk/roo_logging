@@ -117,10 +117,10 @@ DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::DateTime dt) {
   return s;
 }
 
-}  // namespace roo_logging
+#if defined(ARDUINO)
 
 roo_logging::DefaultLogStream& operator<<(roo_logging::DefaultLogStream& s,
-                                          const String& val) {
+                                          const ::String& val) {
   size_t len = val.length();
   size_t cap = s.remaining_capacity();
   if (len > cap) len = cap;
@@ -128,3 +128,7 @@ roo_logging::DefaultLogStream& operator<<(roo_logging::DefaultLogStream& s,
   s.pos_ += len;
   return s;
 }
+
+#endif
+
+}  // namespace roo_logging

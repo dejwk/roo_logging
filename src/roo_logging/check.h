@@ -33,6 +33,7 @@
 
 #include "roo_logging/stream.h"
 
+
 namespace roo_logging {
 
 // A helper class for formatting "expr (V1 vs. V2)" in a CHECK_XX

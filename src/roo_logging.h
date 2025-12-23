@@ -1,6 +1,9 @@
 #pragma once
 
+#if defined(ARDUINO)
 #include <Arduino.h>
+#endif
+
 #include <inttypes.h>
 
 #include <cstring>
@@ -380,10 +383,14 @@ T CheckNotNull(const char* file, int line, const char* names, T&& t) {
   return std::forward<T>(t);
 }
 
+#if defined(ARDUINO)
+
 // A non-macro interface to the log facility; (useful
 // when the logging level is not a compile-time constant).
-inline void LogAtLevel(int const severity, const String& msg) {
+inline void LogAtLevel(int const severity, const ::String& msg) {
   LogMessage(__FILE__, __LINE__, severity).stream() << msg;
 }
+
+#endif
 
 }  // namespace roo_logging

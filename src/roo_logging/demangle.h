@@ -71,6 +71,8 @@
 
 #pragma once
 
+#include <cstddef>
+
 #include "roo_logging/config.h"
 
 namespace roo_logging {

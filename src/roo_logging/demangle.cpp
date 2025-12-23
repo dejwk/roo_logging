@@ -108,15 +108,15 @@ const AbbrevPair kSubstitutionList[] = {
 
 // State needed for demangling.
 struct State {
-  const char* mangled_cur;   // Cursor of mangled name.
-  char* out_cur;             // Cursor of output string.
-  const char* out_begin;     // Beginning of output string.
-  const char* out_end;       // End of output string.
-  const char* prev_name;     // For constructors/destructors.
-  ssize_t prev_name_length;  // For constructors/destructors.
-  short nest_level;          // For nested names.
-  bool append;               // Append flag.
-  bool overflowed;           // True if output gets overflowed.
+  const char* mangled_cur;  // Cursor of mangled name.
+  char* out_cur;            // Cursor of output string.
+  const char* out_begin;    // Beginning of output string.
+  const char* out_end;      // End of output string.
+  const char* prev_name;    // For constructors/destructors.
+  int prev_name_length;     // For constructors/destructors.
+  short nest_level;         // For nested names.
+  bool append;              // Append flag.
+  bool overflowed;          // True if output gets overflowed.
   uint32_t local_level;
   uint32_t expr_level;
   uint32_t arg_level;
@@ -134,8 +134,8 @@ size_t StrLen(const char* str) {
 }
 
 // Returns true if "str" has at least "n" characters remaining.
-bool AtLeastNumCharsRemaining(const char* str, ssize_t n) {
-  for (ssize_t i = 0; i < n; ++i) {
+bool AtLeastNumCharsRemaining(const char* str, size_t n) {
+  for (size_t i = 0; i < n; ++i) {
     if (str[i] == '\0') {
       return false;
     }
@@ -230,12 +230,12 @@ bool ZeroOrMore(ParseFunc parse_func, State* state) {
 // Append "str" at "out_cur".  If there is an overflow, "overflowed"
 // is set to true for later use.  The output string is ensured to
 // always terminate with '\0' as long as there is no overflow.
-void Append(State* state, const char* const str, ssize_t length) {
+void Append(State* state, const char* const str, size_t length) {
   if (state->out_cur == nullptr) {
     state->overflowed = true;
     return;
   }
-  for (ssize_t i = 0; i < length; ++i) {
+  for (size_t i = 0; i < length; ++i) {
     if (state->out_cur + 1 < state->out_end) {  // +1 for '\0'
       *state->out_cur = str[i];
       ++state->out_cur;
@@ -286,8 +286,7 @@ bool IsFunctionCloneSuffix(const char* str) {
 
 // Append "str" with some tweaks, iff "append" state is true.
 // Returns true so that it can be placed in "if" conditions.
-void MaybeAppendWithLength(State* state, const char* const str,
-                           ssize_t length) {
+void MaybeAppendWithLength(State* state, const char* const str, int length) {
   if (state->append && length > 0) {
     // Append a space if the output buffer ends with '<' and "str"
     // starts with '<' to avoid <<<.
@@ -308,7 +307,7 @@ void MaybeAppendWithLength(State* state, const char* const str,
 bool MaybeAppend(State* state, const char* const str) {
   if (state->append) {
     size_t length = StrLen(str);
-    MaybeAppendWithLength(state, str, static_cast<ssize_t>(length));
+    MaybeAppendWithLength(state, str, static_cast<int>(length));
   }
   return true;
 }
@@ -362,10 +361,10 @@ void MaybeCancelLastSeparator(State* state) {
 
 // Returns true if the identifier of the given length pointed to by
 // "mangled_cur" is anonymous namespace.
-bool IdentifierIsAnonymousNamespace(State* state, ssize_t length) {
+bool IdentifierIsAnonymousNamespace(State* state, int length) {
   const char anon_prefix[] = "_GLOBAL__N_";
-  return (length > static_cast<ssize_t>(sizeof(anon_prefix)) -
-                       1 &&  // Should be longer.
+  return (length >
+              static_cast<int>(sizeof(anon_prefix)) - 1 &&  // Should be longer.
           StrPrefix(state->mangled_cur, anon_prefix));
 }
 
@@ -383,7 +382,7 @@ bool ParseLocalSourceName(State* state);
 bool ParseNumber(State* state, int* number_out);
 bool ParseFloatNumber(State* state);
 bool ParseSeqId(State* state);
-bool ParseIdentifier(State* state, ssize_t length);
+bool ParseIdentifier(State* state, int length);
 bool ParseAbiTags(State* state);
 bool ParseAbiTag(State* state);
 bool ParseOperatorName(State* state);
@@ -660,7 +659,7 @@ bool ParseSeqId(State* state) {
 }
 
 // <identifier> ::= <unqualified source code identifier> (of given length)
-bool ParseIdentifier(State* state, ssize_t length) {
+bool ParseIdentifier(State* state, int length) {
   if (length == -1 || !AtLeastNumCharsRemaining(state->mangled_cur, length)) {
     return false;
   }
@@ -854,7 +853,7 @@ bool ParseCtorDtorName(State* state) {
   State copy = *state;
   if (ParseOneCharToken(state, 'C') && ParseCharClass(state, "123")) {
     const char* const prev_name = state->prev_name;
-    const ssize_t prev_name_length = state->prev_name_length;
+    const int prev_name_length = state->prev_name_length;
     MaybeAppendWithLength(state, prev_name, prev_name_length);
     return true;
   }
@@ -862,7 +861,7 @@ bool ParseCtorDtorName(State* state) {
 
   if (ParseOneCharToken(state, 'D') && ParseCharClass(state, "012")) {
     const char* const prev_name = state->prev_name;
-    const ssize_t prev_name_length = state->prev_name_length;
+    const int prev_name_length = state->prev_name_length;
     MaybeAppend(state, "~");
     MaybeAppendWithLength(state, prev_name, prev_name_length);
     return true;

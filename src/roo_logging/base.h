@@ -31,7 +31,10 @@
 
 #pragma once
 
+#if defined(ARDUINO)
 #include <Arduino.h>
+#endif
+
 #include <inttypes.h>
 
 #include <cstring>

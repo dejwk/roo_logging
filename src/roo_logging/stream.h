@@ -33,7 +33,12 @@
 
 #include <utility>
 
-#include "Print.h"
+#if defined(ARDUINO)
+#include "Arduino.h"
+#endif
+
+#include "roo_backport.h"
+#include "roo_backport/string_view.h"
 #include "roo_logging/config.h"
 #include "roo_logging/predict.h"
 #include "roo_time.h"
@@ -161,7 +166,8 @@ inline DefaultLogStream& operator<<(DefaultLogStream& s,
   return s;
 }
 
-inline DefaultLogStream& operator<<(DefaultLogStream& s, const Printable& val) {
+inline DefaultLogStream& operator<<(DefaultLogStream& s,
+                                    const ::Printable& val) {
   s.print(val);
   return s;
 }
@@ -178,7 +184,7 @@ DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::DateTime dt);
 // Output the COUNTER value.
 inline DefaultLogStream& operator<<(DefaultLogStream& os,
                                     const PRIVATE_Counter&) {
-  os << os.ctr();
+  os << (int)os.ctr();
   return os;
 }
 
@@ -265,35 +271,11 @@ class NullStreamFatal : public NullStream {
   __attribute__((noreturn)) ~NullStreamFatal() throw() { exit(1); }
 };
 
-}  // namespace roo_logging
+#if defined(ARDUINO)
 
-#if defined(ESP32) || defined(ESP8266) || defined(__linux__)
-#include <string>
+roo_logging::DefaultLogStream& operator<<(roo_logging::DefaultLogStream& s,
+                                          const ::String& val);
 
-inline roo_logging::DefaultLogStream& operator<<(
-    roo_logging::DefaultLogStream& s, const std::string& val) {
-  size_t len = val.size();
-  size_t cap = s.remaining_capacity();
-  if (len > cap) len = cap;
-  memcpy(&s.buf_[s.pos_], val.data(), len);
-  s.pos_ += len;
-  return s;
-}
-
-#if __cplusplus >= 201703L
-#include <string_view>
-
-inline roo_logging::DefaultLogStream& operator<<(
-    roo_logging::DefaultLogStream& s, std::string_view val) {
-  size_t len = val.size();
-  size_t cap = s.remaining_capacity();
-  if (len > cap) len = cap;
-  memcpy(&s.buf_[s.pos_], val.data(), len);
-  s.pos_ += len;
-  return s;
-}
-
-#endif
 #endif
 
 // Logging for iterable collections.
@@ -315,5 +297,39 @@ inline roo_logging::DefaultLogStream& operator<<(
   return s;
 }
 
-roo_logging::DefaultLogStream& operator<<(roo_logging::DefaultLogStream& s,
-                                          const String& val);
+inline roo_logging::DefaultLogStream& operator<<(
+    roo_logging::DefaultLogStream& s, roo::string_view val) {
+  size_t len = val.size();
+  size_t cap = s.remaining_capacity();
+  if (len > cap) len = cap;
+  memcpy(&s.buf_[s.pos_], val.data(), len);
+  s.pos_ += len;
+  return s;
+}
+
+}  // namespace roo_logging
+
+#if defined(ESP_PLATFORM) || defined(__linux__)
+#include <string>
+
+namespace roo_logging {
+
+inline roo_logging::DefaultLogStream& operator<<(
+    roo_logging::DefaultLogStream& s, const std::string& val) {
+  size_t len = val.size();
+  size_t cap = s.remaining_capacity();
+  if (len > cap) len = cap;
+  memcpy(&s.buf_[s.pos_], val.data(), len);
+  s.pos_ += len;
+  return s;
+}
+
+}  // namespace roo_logging
+
+#endif
+
+// #if __cplusplus >= 201703L
+// #include <string_view>
+
+
+// #endif
