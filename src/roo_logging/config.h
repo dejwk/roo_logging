@@ -61,3 +61,17 @@ ROO_DECLARE_FLAG(uint8_t, roo_logging_minloglevel);
 #ifdef ROO_LOGGING_HAVE_SYMBOLIZE
 #define ROO_LOGGING_SYMBOLIZE_STACKTRACE 1
 #endif
+
+#if defined(ARDUINO)
+#include <Arduino.h>
+
+namespace roo_logging {
+using StringType = ::String;
+}
+
+#else
+#include <string>
+namespace roo_logging {
+using StringType = ::std::string;
+}
+#endif

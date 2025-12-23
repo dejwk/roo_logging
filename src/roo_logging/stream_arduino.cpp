@@ -29,52 +29,24 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "roo_logging/check.h"
+#include "roo_logging/stream_arduino.h"
+
+#if (defined(ESP32) || defined(ROO_TESTING))
+#include <stdarg.h>
+#include <stdio.h>
 
 namespace roo_logging {
 
-CheckOpMessageBuilder::CheckOpMessageBuilder(const char* exprtext)
-    : stream_(new OStringStream) {
-  *stream_ << exprtext << " (";
-}
-
-CheckOpMessageBuilder::~CheckOpMessageBuilder() { delete stream_; }
-
-Stream* CheckOpMessageBuilder::ForVar2() {
-  *stream_ << " vs. ";
-  return stream_;
-}
-
-StringType* CheckOpMessageBuilder::NewString() {
-  *stream_ << ")";
-  return stream_->newString();
-}
-
-template <>
-void MakeCheckOpValueString(Stream* os, const char& v) {
-  if (v >= 32 && v <= 126) {
-    (*os) << "'" << v << "'";
-  } else {
-    (*os) << "char value " << (short)v;
-  }
-}
-
-template <>
-void MakeCheckOpValueString(Stream* os, const signed char& v) {
-  if (v >= 32 && v <= 126) {
-    (*os) << "'" << v << "'";
-  } else {
-    (*os) << "signed char value " << (short)v;
-  }
-}
-
-template <>
-void MakeCheckOpValueString(Stream* os, const unsigned char& v) {
-  if (v >= 32 && v <= 126) {
-    (*os) << "'" << v << "'";
-  } else {
-    (*os) << "unsigned char value " << (unsigned short)v;
-  }
+// Optimized version of printf.
+size_t ArduinoLogStream::printf(const char* format, ...) {
+  va_list arg;
+  va_start(arg, format);
+  int len = vsnprintf(buf_ + pos_, remaining_capacity(), format, arg);
+  va_end(arg);
+  pos_ += len;
+  return len;
 }
 
 }  // namespace roo_logging
+
+#endif

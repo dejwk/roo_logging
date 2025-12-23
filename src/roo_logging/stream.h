@@ -33,15 +33,23 @@
 
 #include <utility>
 
-#if defined(ARDUINO)
-#include "Arduino.h"
-#endif
-
 #include "roo_backport.h"
 #include "roo_backport/string_view.h"
 #include "roo_logging/config.h"
 #include "roo_logging/predict.h"
 #include "roo_time.h"
+
+#if defined(ARDUINO)
+#include "roo_logging/stream_arduino.h"
+
+using StreamBase = roo_logging::ArduinoLogStream;
+
+#elif defined(ESP_PLATFORM)
+#include "roo_logging/stream_espidf.h"
+
+using StreamBase = roo_logging::EspidfLogStream;
+
+#endif
 
 namespace roo_logging {
 
@@ -52,55 +60,9 @@ enum PRIVATE_Counter { COUNTER };
 // is so that streaming can be done more efficiently.
 static constexpr size_t kMaxLogMessageLen = 1024;
 
-class DefaultLogStream : public Print {
+class DefaultLogStream : public StreamBase {
  public:
-  DefaultLogStream(char* buf, size_t cap)
-      : buf_(buf), pos_(0), cap_(cap), number_base_(10), ctr_(0) {}
-  size_t remaining_capacity() const { return cap_ - pos_ - 1; }
-  bool full() const { return remaining_capacity() == 0; }
-
-  void setBase(int base) {
-    if (base < 2) base = 10;
-    number_base_ = base;
-  }
-
-  bool write(char b) {
-    if (full()) return false;
-    buf_[pos_++] = b;
-    return true;
-  }
-
-  size_t write(uint8_t b) override { return write((char)b) ? 1 : 0; }
-
-  size_t write(const uint8_t* buffer, size_t size) override {
-    return write((const char*)buffer, size);
-  }
-
-  size_t write(const char* buf, size_t len) {
-    size_t cap = remaining_capacity();
-    if (len > cap) len = cap;
-    memcpy(&buf_[pos_], buf, len);
-    pos_ += len;
-    return len;
-  }
-
-#if (defined(ESP32) || defined(ROO_TESTING))
-  // Optimized version of printf.
-  size_t printf(const char* format, ...);
-#endif
-
-  int number_base() const { return number_base_; }
-
-  int pcount() const { return pos_; }
-
-  int ctr() const { return ctr_; }
-  void set_ctr(int ctr) { ctr_ = ctr; }
-
-  char* buf_;
-  size_t pos_;
-  size_t cap_;
-  int number_base_;
-  int ctr_;
+  DefaultLogStream(char* buf, size_t cap) : StreamBase(buf, cap) {}
 };
 
 DefaultLogStream& operator<<(DefaultLogStream& s, const char* val);
@@ -166,11 +128,15 @@ inline DefaultLogStream& operator<<(DefaultLogStream& s,
   return s;
 }
 
+#if defined(ARDUINO)
+
 inline DefaultLogStream& operator<<(DefaultLogStream& s,
                                     const ::Printable& val) {
   s.print(val);
   return s;
 }
+
+#endif
 
 DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Uptime uptime);
 
@@ -222,7 +188,7 @@ class OStringStream : public DefaultLogStream {
  public:
   OStringStream() : DefaultLogStream(val_, kMaxLogMessageLen) {}
 
-  String* newString() { return new String(val_, pcount()); }
+  StringType* newString() { return new StringType(val_, pcount()); }
 
  private:
   char val_[kMaxLogMessageLen];
@@ -330,6 +296,5 @@ inline roo_logging::DefaultLogStream& operator<<(
 
 // #if __cplusplus >= 201703L
 // #include <string_view>
-
 
 // #endif

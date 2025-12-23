@@ -31,10 +31,6 @@
 
 #pragma once
 
-#if defined(ARDUINO)
-#include <Arduino.h>
-#endif
-
 #include <inttypes.h>
 
 #include <cstring>
@@ -164,13 +160,13 @@ namespace roo_logging {
 // A container for a string pointer which can be evaluated to a bool -
 // true iff the pointer is NULL.
 struct CheckOpString {
-  CheckOpString(::String* str) : str_(str) {}
+  CheckOpString(StringType* str) : str_(str) {}
   // No destructor: if str_ is non-NULL, we're about to LOG(FATAL),
   // so there's no point in cleaning up str_.
   operator bool() const {
     return ROO_PREDICT_BRANCH_NOT_TAKEN(str_ != nullptr);
   }
-  ::String* str_;
+  StringType* str_;
 };
 
 }  // namespace roo_logging

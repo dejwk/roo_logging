@@ -38,18 +38,6 @@
 
 namespace roo_logging {
 
-#if (defined(ESP32) || defined(ROO_TESTING))
-// Optimized version of printf.
-size_t DefaultLogStream::printf(const char* format, ...) {
-  va_list arg;
-  va_start(arg, format);
-  int len = vsnprintf(buf_ + pos_, remaining_capacity(), format, arg);
-  va_end(arg);
-  pos_ += len;
-  return len;
-}
-#endif
-
 DefaultLogStream& operator<<(DefaultLogStream& s, const char* val) {
   size_t len = strlen(val);
   size_t cap = s.remaining_capacity();

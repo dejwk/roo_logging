@@ -33,7 +33,6 @@
 
 #include "roo_logging/stream.h"
 
-
 namespace roo_logging {
 
 // A helper class for formatting "expr (V1 vs. V2)" in a CHECK_XX
@@ -53,7 +52,7 @@ class CheckOpMessageBuilder {
   // For inserting the second variable (adds an intermediate " vs. ").
   Stream* ForVar2();
   // Get the result (inserts the closing ")").
-  ::String* NewString();
+  StringType* NewString();
 
  private:
   OStringStream* stream_;
@@ -97,7 +96,8 @@ template <>
 void MakeCheckOpValueString(Stream* os, const unsigned char& v);
 
 template <typename T1, typename T2>
-String* MakeCheckOpString(const T1& v1, const T2& v2, const char* exprtext) {
+StringType* MakeCheckOpString(const T1& v1, const T2& v2,
+                              const char* exprtext) {
   CheckOpMessageBuilder comb(exprtext);
   MakeCheckOpValueString(comb.ForVar1(), v1);
   MakeCheckOpValueString(comb.ForVar2(), v2);
@@ -108,17 +108,17 @@ String* MakeCheckOpString(const T1& v1, const T2& v2, const char* exprtext) {
 // The (int, int) specialization works around the issue that the compiler
 // will not instantiate the template version of the function on values of
 // unnamed enum type - see comment below.
-#define DEFINE_CHECK_OP_IMPL(name, op)                                \
-  template <typename T1, typename T2>                                 \
-  inline ::String* name##Impl(const T1& v1, const T2& v2,             \
-                              const char* exprtext) {                 \
-    if (ROO_PREDICT_TRUE(v1 op v2))                                   \
-      return nullptr;                                                 \
-    else                                                              \
-      return ::roo_logging::MakeCheckOpString(v1, v2, exprtext);      \
-  }                                                                   \
-  inline ::String* name##Impl(int v1, int v2, const char* exprtext) { \
-    return name##Impl<int, int>(v1, v2, exprtext);                    \
+#define DEFINE_CHECK_OP_IMPL(name, op)                                  \
+  template <typename T1, typename T2>                                   \
+  inline StringType* name##Impl(const T1& v1, const T2& v2,             \
+                                const char* exprtext) {                 \
+    if (ROO_PREDICT_TRUE(v1 op v2))                                     \
+      return nullptr;                                                   \
+    else                                                                \
+      return ::roo_logging::MakeCheckOpString(v1, v2, exprtext);        \
+  }                                                                     \
+  inline StringType* name##Impl(int v1, int v2, const char* exprtext) { \
+    return name##Impl<int, int>(v1, v2, exprtext);                      \
   }
 
 // We use the full name Check_EQ, Check_NE, etc. in case the file including
@@ -149,7 +149,7 @@ DEFINE_CHECK_OP_IMPL(Check_GT, >)
 // with other string implementations that get defined after this
 // file is included).  Save the current meaning now and use it
 // in the macro.
-typedef ::String _Check_string;
+typedef StringType _Check_string;
 
 #define CHECK_OP_LOG(name, op, val1, val2, log)              \
   while (::roo_logging::_Check_string* _result =             \
@@ -179,9 +179,9 @@ typedef ::String _Check_string;
 
 // Helper functions for string comparisons.
 // To avoid bloat, the definitions are in logging.cc.
-#define DECLARE_CHECK_STROP_IMPL(func, expected)                      \
-  String* Check##func##expected##Impl(const char* s1, const char* s2, \
-                                      const char* names);
+#define DECLARE_CHECK_STROP_IMPL(func, expected)                          \
+  StringType* Check##func##expected##Impl(const char* s1, const char* s2, \
+                                          const char* names);
 DECLARE_CHECK_STROP_IMPL(strcmp, true)
 DECLARE_CHECK_STROP_IMPL(strcmp, false)
 DECLARE_CHECK_STROP_IMPL(strcasecmp, true)
