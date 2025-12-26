@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined(ARDUINO)
+#if defined(ARDUINO) || defined(ROO_TESTING)
 #include "Arduino.h"
 
 #include "roo_backport.h"
@@ -43,7 +43,7 @@ class ArduinoLogStream : public Print {
     return len;
   }
 
-#if (defined(ESP32) || defined(ROO_TESTING))
+#if defined(ESP32) || defined(ROO_TESTING)
   // Optimized version of printf.
   size_t printf(const char* format, ...);
 #endif

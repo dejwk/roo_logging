@@ -11,6 +11,7 @@ cc_library(
     ),
     includes = [ "src" ],
     deps = [
+        "@roo_backport",
         "@roo_flags",
         "@roo_time",
         "@roo_threads",
