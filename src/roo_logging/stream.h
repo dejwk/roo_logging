@@ -275,13 +275,13 @@ inline roo_logging::DefaultLogStream& operator<<(
 
 }  // namespace roo_logging
 
-#if defined(ESP_PLATFORM) || defined(__linux__)
+#if defined(ESP_PLATFORM) || defined(__linux__) || __has_include(<string>)
 #include <string>
 
 namespace roo_logging {
 
 inline roo_logging::DefaultLogStream& operator<<(
-    roo_logging::DefaultLogStream& s, const std::string& val) {
+    roo_logging::DefaultLogStream& s, const ::std::string& val) {
   size_t len = val.size();
   size_t cap = s.remaining_capacity();
   if (len > cap) len = cap;

@@ -31,7 +31,7 @@
 
 #include "roo_logging/log_message.h"
 
-#if (defined ESP32)
+#if (defined __FREERTOS)
 #include "freertos/task.h"
 #elif (defined __linux__)
 #include <pthread.h>
@@ -225,7 +225,7 @@ void LogMessage::Init(const char* file, int line, LogSeverity severity,
       stream() << dt;
       stream().write(' ');
     }
-#if (defined ESP_PLATFORM || defined ROO_TESTING)
+#if (defined __FREERTOS)
     TaskHandle_t tHandle = xTaskGetCurrentTaskHandle();
     // Can be null if called from a static initializer.
     if (tHandle != nullptr) {

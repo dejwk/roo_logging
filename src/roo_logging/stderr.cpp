@@ -55,11 +55,14 @@ void ColoredWriteToStderr(LogSeverity severity, const char* message, size_t len,
       ets_printf("%s", message);
       return;
     }
-#endif
     // Not using ets_printf in general, because it assumes UART0, which doesn't
     // work well with JTAG debugging which sends stderr over USB.
     fwrite(message, len, 1, stderr);
     return;
+#else
+    printf("%s", message);
+    return;
+#endif
   }
 #if (defined ESP_PLATFORM)
   if (from_static_initializer) {
@@ -67,13 +70,15 @@ void ColoredWriteToStderr(LogSeverity severity, const char* message, size_t len,
     ets_printf("\033[0;3%sm%s\033[m", GetAnsiColorCode(color), message);
     return;
   }
-#endif
-
   fwrite("\033[0;3", 5, 1, stderr);
   fwrite(GetAnsiColorCode(color), 1, 1, stderr);
   fwrite("m", 1, 1, stderr);
   fwrite(message, len, 1, stderr);
   fwrite("\033[m", 3, 1, stderr);  // Resets the terminal to default.
+#else
+  printf("\033[0;3%sm%s\033[m", GetAnsiColorCode(color), message);
+  return;
+#endif
 }
 
 }  // namespace
