@@ -227,10 +227,12 @@ void LogMessage::Init(const char* file, int line, LogSeverity severity,
     }
 #if (defined __FREERTOS)
     TaskHandle_t tHandle = xTaskGetCurrentTaskHandle();
+    BaseType_t core_id = portGET_CORE_ID();
+
     // Can be null if called from a static initializer.
     if (tHandle != nullptr) {
       char* tName = pcTaskGetName(tHandle);
-      stream() << tName << '(' << tHandle << ") ";
+      stream() << tName << '(' << tHandle << ",core" << (int)core_id << ") ";
     } else {
       data_->from_static_initializer_ = true;
     }
