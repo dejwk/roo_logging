@@ -31,7 +31,7 @@
 
 #include "roo_logging/log_message.h"
 
-#if (defined __FREERTOS)
+#if (defined __FREERTOS || defined ESP_PLATFORM)
 #include "freertos/task.h"
 #elif (defined __linux__)
 #include <pthread.h>
@@ -225,7 +225,7 @@ void LogMessage::Init(const char* file, int line, LogSeverity severity,
       stream() << dt;
       stream().write(' ');
     }
-#if (defined __FREERTOS)
+#if (defined __FREERTOS || defined ESP_PLATFORM)
     TaskHandle_t tHandle = xTaskGetCurrentTaskHandle();
     BaseType_t core_id = portGET_CORE_ID();
 
