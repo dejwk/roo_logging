@@ -25,6 +25,9 @@ ROO_DECLARE_FLAG(bool, roo_logging_colorlogtostderr);
 // Messages with severity below this level are not logged at all.
 ROO_DECLARE_FLAG(uint8_t, roo_logging_minloglevel);
 
+// If true, core ID will be logged in log messages when running on FreeRTOS.
+ROO_DECLARE_FLAG(bool, roo_logging_freertos_log_core_id);
+
 // The global value of ROO_STRIP_LOG. All the messages logged to
 // LOG(XXX) with severity less than ROO_STRIP_LOG will not be displayed.
 // If it can be determined at compile time that the message will not be
@@ -70,6 +73,9 @@ ROO_DECLARE_FLAG(uint8_t, roo_logging_minloglevel);
 #endif
 #ifndef ROO_LOGGING_MINLOGLEVEL
 #define ROO_LOGGING_MINLOGLEVEL 0
+#endif
+#ifndef ROO_LOGGING_FREERTOS_LOG_CORE_ID
+#define ROO_LOGGING_FREERTOS_LOG_CORE_ID 0
 #endif
 
 #if defined(ARDUINO)

@@ -232,7 +232,11 @@ void LogMessage::Init(const char* file, int line, LogSeverity severity,
     // Can be null if called from a static initializer.
     if (tHandle != nullptr) {
       char* tName = pcTaskGetName(tHandle);
-      stream() << tName << '(' << tHandle << ",core" << (int)core_id << ") ";
+      stream() << tName << '(' << tHandle;
+      if (GET_ROO_FLAG(roo_logging_freertos_log_core_id)) {
+        stream() << ",core" << (int)core_id;
+      }
+      stream() << ") ";
     } else {
       data_->from_static_initializer_ = true;
     }
