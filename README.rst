@@ -2,8 +2,12 @@ roo_logging Library
 ======================
 
 roo_logging is a lightweight C++14 library that implements application-level logging for
-Arduino systems. The library provides logging APIs based on C++-style streams and
+microcontrollers. The library provides logging APIs based on C++-style streams and
 various helper macros.
+
+The library works with the ESP32 family of microcontrollers (Arduino framework as well as
+esp-idf), and RP2040-based Raspberry Pi Pico. It may work on other microcontrollers as well,
+but it requires a fairly decent C++ standard library implementation.
 
 The library will add only ~6 KB to your binary size. Debug-only logging can be completely
 optimized away in release builds.
@@ -11,8 +15,8 @@ optimized away in release builds.
 What's new
 ---------------
 
-Added support for verbose and per-module logging. You can use per-module logging to add
-conditional debug logging to your own Arduino library.
+* Added support for esp-idf and Raspberry Pi Pico.
+* Fixed logging very early at run time (e.g. during static initialization).
 
 Getting Started
 ---------------
@@ -63,10 +67,10 @@ production by automatically reducing the severity to ``ERROR``.
 
 By default, roo_logging writes to the default Serial interface.
 
-Setting Flags
+Configuration
 ~~~~~~~~~~~~~
 
-Several flags influence roo_logging's output behavior.
+Several flags influence roo_logging's output behavior at run time.
 The following flags are most commonly used:
 
 ``roo_logging_minloglevel`` (``int``, default=0, which is ``INFO``)
@@ -87,8 +91,16 @@ The following flags are most commonly used:
    You need to configure the console to recognize color input
    (e.g., if using PlatformIO, set ``monitor_raw = yes`` in ``platformio.ini``.)
 
+``roo_logging_freertos_log_core_id`` (``bool``, default=false)
+   If set, when running on a FreeRTOS-based system (e.g. ESP32), includes FreeRTOS core ID
+   in the log message prefix.
+
 You can set flag values in your program, using the ``SET_ROO_GLOG(flag_name, value)``
 macro. Most settings start working immediately after the update.
+
+You can also set the default values for some of these flags at compile time by
+defining the appropriate macros: ``ROO_LOGGING_MINLOGLEVEL``,
+``ROO_LOGGING_COLORLOGTOSTDERR``, ``ROO_LOGGING_FREERTOS_LOG_CORE_ID``.
 
 Conditional / Occasional Logging
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
