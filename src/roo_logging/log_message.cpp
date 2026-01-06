@@ -250,7 +250,7 @@ void LogMessage::Init(const char* file, int line, LogSeverity severity,
       if (buf[0] != 0) {
         stream() << buf << " ";
       } else {
-        data_->static_initializer_ = true;
+        data_->from_static_initializer_ = true;
       }
     }
 #endif
