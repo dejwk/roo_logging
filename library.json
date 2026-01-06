@@ -29,7 +29,7 @@
     ],
     "dependencies": {
         "dejwk/roo_flags": ">=1.1.1",
-        "dejwk/roo_time": ">=1.3.3",
-        "dejwk/roo_threads": ">=1.1.6"
+        "dejwk/roo_time": ">=1.4.0",
+        "dejwk/roo_threads": ">=1.2.0"
     }
 }
