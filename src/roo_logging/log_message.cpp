@@ -32,7 +32,7 @@
 #include "roo_logging/log_message.h"
 
 #if (defined __FREERTOS || defined ESP_PLATFORM)
-#include "FreeRTOS.h"
+#include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #elif (defined __linux__)
 #include <pthread.h>
