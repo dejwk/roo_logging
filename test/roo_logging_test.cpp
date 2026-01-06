@@ -8,9 +8,7 @@
 #include <string>
 
 struct StaticLogTest {
-  StaticLogTest() {
-    LOG(INFO) << "Foo";
-  }
+  StaticLogTest() { LOG(INFO) << "Foo"; }
 } static_test;
 
 class LogCapture : public roo_logging::LogSink {
@@ -50,6 +48,12 @@ TEST(Logging, ErrorLogging) {
   LOG(ERROR) << "This is an error message";
   std::string output = capture.str();
   EXPECT_NE(output.find("This is an error message"), std::string::npos);
+}
+
+void boo() { CHECK(false) << "Boo!"; }
+
+TEST(Logging, FatalLogging) {
+  EXPECT_DEATH({ boo(); }, "Boo!");
 }
 
 TEST(Logging, MultipleMessages) {

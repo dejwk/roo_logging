@@ -33,3 +33,19 @@ cc_test(
     ],
     size = "small",
 )
+
+# Same as above, but linked against the regular gtest for Linux; not emulating Arduino.
+cc_test(
+    name = "roo_logging_linux_test",
+    srcs = [
+        "test/roo_logging_test.cpp",
+    ],
+    copts = ["-Iexternal/gtest/include"],
+    includes = ["src"],
+    linkstatic = 1,
+    deps = [
+        ":roo_logging",
+        "@googletest//:gtest_main",
+    ],
+    size = "small",
+)

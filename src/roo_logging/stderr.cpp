@@ -50,11 +50,14 @@ void ColoredWriteToStderr(LogSeverity severity, const char* message, size_t len,
   LogColor color = coloring ? SeverityToColor(severity) : COLOR_DEFAULT;
   if (color == COLOR_DEFAULT) {
 #if (defined ESP_PLATFORM)
+#if !defined(__linux__)
+    // Note: emulated ets_printf would write to stdout, not stderr.
     if (from_static_initializer) {
       // stderr might not yet be initialized. Write directly to UART.
       ets_printf("%s", message);
       return;
     }
+#endif
     // Not using ets_printf in general, because it assumes UART0, which doesn't
     // work well with JTAG debugging which sends stderr over USB.
     fwrite(message, len, 1, stderr);
