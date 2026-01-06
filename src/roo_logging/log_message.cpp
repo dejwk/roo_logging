@@ -32,6 +32,7 @@
 #include "roo_logging/log_message.h"
 
 #if (defined __FREERTOS || defined ESP_PLATFORM)
+#include "FreeRTOS.h"
 #include "freertos/task.h"
 #elif (defined __linux__)
 #include <pthread.h>
@@ -227,15 +228,17 @@ void LogMessage::Init(const char* file, int line, LogSeverity severity,
     }
 #if (defined __FREERTOS || defined ESP_PLATFORM)
     TaskHandle_t tHandle = xTaskGetCurrentTaskHandle();
-    BaseType_t core_id = portGET_CORE_ID();
 
     // Can be null if called from a static initializer.
     if (tHandle != nullptr) {
       char* tName = pcTaskGetName(tHandle);
       stream() << tName << '(' << tHandle;
+#if (defined portGET_CORE_ID)
       if (GET_ROO_FLAG(roo_logging_freertos_log_core_id)) {
+        BaseType_t core_id = portGET_CORE_ID();
         stream() << ",core" << (int)core_id;
       }
+#endif
       stream() << ") ";
     } else {
       data_->from_static_initializer_ = true;
