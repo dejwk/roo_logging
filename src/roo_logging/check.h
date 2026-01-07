@@ -52,7 +52,10 @@ class CheckOpMessageBuilder {
   // For inserting the second variable (adds an intermediate " vs. ").
   Stream* ForVar2();
   // Get the result (inserts the closing ")").
-  StringType* NewString();
+  StringType* NewString() {
+    *stream_ << ")";
+    return stream_->newString();
+  }
 
  private:
   OStringStream* stream_;

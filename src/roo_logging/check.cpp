@@ -45,11 +45,6 @@ Stream* CheckOpMessageBuilder::ForVar2() {
   return stream_;
 }
 
-StringType* CheckOpMessageBuilder::NewString() {
-  *stream_ << ")";
-  return stream_->newString();
-}
-
 template <>
 void MakeCheckOpValueString(Stream* os, const char& v) {
   if (v >= 32 && v <= 126) {
