@@ -28,8 +28,8 @@
         "examples/**/*.ino"
     ],
     "dependencies": {
-        "dejwk/roo_backport": ">=1.2.0",
-        "dejwk/roo_flags": ">=1.2.0",
+        "dejwk/roo_backport": ">=1.2.1",
+        "dejwk/roo_flags": ">=1.2.1",
         "dejwk/roo_time": ">=1.4.1",
         "dejwk/roo_threads": ">=1.2.1"
     }
