@@ -130,7 +130,7 @@ static ssize_t ReadPersistent(const int fd, void *buf, const size_t count) {
   SAFE_ASSERT(fd >= 0);
   SAFE_ASSERT(count <= std::numeric_limits<ssize_t>::max());
   char *buf0 = reinterpret_cast<char *>(buf);
-  ssize_t num_bytes = 0;
+  size_t num_bytes = 0;
   while (num_bytes < count) {
     ssize_t len;
     NO_INTR(len = read(fd, buf0 + num_bytes, count - num_bytes));
@@ -140,10 +140,10 @@ static ssize_t ReadPersistent(const int fd, void *buf, const size_t count) {
     if (len == 0) {  // Reached EOF.
       break;
     }
-    num_bytes += len;
+    num_bytes += static_cast<size_t>(len);
   }
   SAFE_ASSERT(num_bytes <= count);
-  return num_bytes;
+  return static_cast<ssize_t>(num_bytes);
 }
 
 // Read up to "count" bytes from "offset" in the file pointed by file
@@ -165,7 +165,7 @@ static ssize_t ReadFromOffset(const int fd, void *buf, const size_t count,
 static bool ReadFromOffsetExact(const int fd, void *buf, const size_t count,
                                 const off_t offset) {
   ssize_t len = ReadFromOffset(fd, buf, count, offset);
-  return len == count;
+  return len == static_cast<ssize_t>(count);
 }
 
 // Returns elf_header.e_type if the file pointed by fd is an ELF binary.
@@ -194,8 +194,9 @@ static ATTRIBUTE_NOINLINE bool GetSectionHeaderByType(const int fd,
   ElfW(Shdr) buf[16];
   for (int i = 0; i < sh_num;) {
     const ssize_t num_bytes_left = (sh_num - i) * sizeof(buf[0]);
+    const ssize_t buf_size = static_cast<ssize_t>(sizeof(buf));
     const ssize_t num_bytes_to_read =
-        (sizeof(buf) > num_bytes_left) ? num_bytes_left : sizeof(buf);
+        (buf_size > num_bytes_left) ? num_bytes_left : buf_size;
     const ssize_t len = ReadFromOffset(fd, buf, num_bytes_to_read,
                                        sh_offset + i * sizeof(buf[0]));
     if (len == -1) {
@@ -203,7 +204,8 @@ static ATTRIBUTE_NOINLINE bool GetSectionHeaderByType(const int fd,
     }
     SAFE_ASSERT(len % sizeof(buf[0]) == 0);
     const ssize_t num_headers_in_buf = len / sizeof(buf[0]);
-    SAFE_ASSERT(num_headers_in_buf <= sizeof(buf) / sizeof(buf[0]));
+    SAFE_ASSERT(num_headers_in_buf <=
+                static_cast<ssize_t>(sizeof(buf) / sizeof(buf[0])));
     for (int j = 0; j < num_headers_in_buf; ++j) {
       if (buf[j].sh_type == type) {
         *out = buf[j];
@@ -252,7 +254,7 @@ bool GetSectionHeaderByName(int fd, const char *name, size_t name_len,
     ssize_t n_read = ReadFromOffset(fd, &header_name, name_len, name_offset);
     if (n_read == -1) {
       return false;
-    } else if (n_read != name_len) {
+    } else if (n_read != static_cast<ssize_t>(name_len)) {
       // Short read -- name could be at end of file.
       continue;
     }
@@ -297,7 +299,8 @@ static ATTRIBUTE_NOINLINE bool FindSymbol(uint64_t pc, const int fd, char *out,
     }
     SAFE_ASSERT(len % sizeof(buf[0]) == 0);
     const ssize_t num_symbols_in_buf = len / sizeof(buf[0]);
-    SAFE_ASSERT(num_symbols_in_buf <= sizeof(buf) / sizeof(buf[0]));
+    SAFE_ASSERT(num_symbols_in_buf <=
+                static_cast<ssize_t>(sizeof(buf) / sizeof(buf[0])));
     for (int j = 0; j < num_symbols_in_buf; ++j) {
       const ElfW(Sym) &symbol = buf[j];
       uint64_t start_address = symbol.st_value;
