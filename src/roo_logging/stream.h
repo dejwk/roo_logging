@@ -188,7 +188,15 @@ class OStringStream : public DefaultLogStream {
  public:
   OStringStream() : DefaultLogStream(val_, kMaxLogMessageLen) {}
 
-  StringType* newString() { return new StringType(val_, pcount()); }
+  StringType* newString() {
+#ifdef ESP8266
+  String* s = new String();
+  s->concat(val_, pcount());
+  return s;
+#else
+    return new StringType(val_, pcount());
+#endif
+  }
 
  private:
   char val_[kMaxLogMessageLen];
