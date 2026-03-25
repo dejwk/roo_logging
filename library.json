@@ -15,7 +15,7 @@
         "type": "git",
         "url": "https://github.com/dejwk/roo_logging"
     },
-    "version": "1.5.6",
+    "version": "1.5.7",
     "homepage": "https://github.com/dejwk/roo_logging",
     "frameworks": [
         "*"
@@ -31,6 +31,6 @@
         "dejwk/roo_backport": ">=1.2.2",
         "dejwk/roo_flags": ">=1.2.3",
         "dejwk/roo_time": ">=1.4.4",
-        "dejwk/roo_threads": ">=1.2.4"
+        "dejwk/roo_threads": ">=1.2.5"
     }
 }
