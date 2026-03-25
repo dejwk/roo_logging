@@ -190,9 +190,9 @@ class OStringStream : public DefaultLogStream {
 
   StringType* newString() {
 #ifdef ESP8266
-  String* s = new String();
-  s->concat(val_, pcount());
-  return s;
+    String* s = new String();
+    s->concat(val_, pcount());
+    return s;
 #else
     return new StringType(val_, pcount());
 #endif
@@ -278,6 +278,11 @@ inline roo_logging::DefaultLogStream& operator<<(
   if (len > cap) len = cap;
   memcpy(&s.buf_[s.pos_], val.data(), len);
   s.pos_ += len;
+  return s;
+}
+
+inline DefaultLogStream& operator<<(DefaultLogStream& s, std::nullptr_t t) {
+  s.printf("%p", t);
   return s;
 }
 
