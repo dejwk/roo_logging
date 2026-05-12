@@ -352,9 +352,7 @@ void LogMessage::SendToLog() /*EXCLUSIVE_LOCKS_REQUIRED(log_mutex)*/ {
     WaitForSinks(data_);
 
     const char* message = "*** Check failure stack trace: ***\n";
-    if (fwrite(message, strlen(message), 1, stderr) < 0) {
-      // Ignore errors.
-    }
+    fwrite(message, strlen(message), 1, stderr);
     Fail();
   }
 }
