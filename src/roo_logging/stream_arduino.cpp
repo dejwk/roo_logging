@@ -31,7 +31,7 @@
 
 #include "roo_logging/stream_arduino.h"
 
-#if (defined(ESP32) || defined(ROO_TESTING))
+#if defined(ARDUINO) && (defined(ESP32) || defined(ROO_TESTING))
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -49,4 +49,4 @@ size_t ArduinoLogStream::printf(const char* format, ...) {
 
 }  // namespace roo_logging
 
-#endif
+#endif  // defined(ARDUINO) && (defined(ESP32) || defined(ROO_TESTING))

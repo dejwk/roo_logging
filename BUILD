@@ -15,10 +15,17 @@ cc_library(
     deps = [
         "@roo_backport",
         "@roo_flags",
-        "@roo_testing//roo_testing/frameworks/arduino-esp32-2.0.4/cores/esp32",
         "@roo_threads",
         "@roo_time",
-    ],
+    ] + select({
+        "@roo_testing//roo_testing/platforms:is_arduino": [
+            "@roo_testing//:arduino",
+        ],
+        "@roo_testing//roo_testing/platforms:is_idf": [
+            "@roo_testing//roo_testing/frameworks/esp-idf",
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 cc_test(

@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined(ARDUINO) || defined(ROO_TESTING)
+#if defined(ARDUINO)
 #include "Arduino.h"
 
 #include "roo_backport.h"
@@ -46,7 +46,7 @@ class ArduinoLogStream : public Print {
 #if defined(ESP32) || defined(ROO_TESTING)
   // Optimized version of printf.
   size_t printf(const char* format, ...);
-#endif
+#endif  // defined(ESP32) || defined(ROO_TESTING)
 
   int number_base() const { return number_base_; }
 
@@ -64,4 +64,4 @@ class ArduinoLogStream : public Print {
 
 }  // namespace roo_logging
 
-#endif
+#endif  // defined(ARDUINO)
