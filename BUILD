@@ -37,6 +37,9 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     includes = ["src"],
     linkstatic = 1,
+    target_compatible_with = [
+        "@roo_testing//roo_testing/platforms:arduino",
+    ],
     deps = [
         ":roo_logging",
         "@roo_testing//:arduino_gtest_main",
