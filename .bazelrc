@@ -7,3 +7,7 @@ import %workspace%/.roo_testing/bazelrc/esp32/idf.bazelrc
 import %workspace%/.roo_testing/bazelrc/esp32/arduino.bazelrc
 
 # Bazelisk defaults configured commands to Arduino unless a frontend is selected.
+
+# GCC 14 can emit spurious maybe-uninitialized warnings in glog's logging.cc
+# with AddressSanitizer enabled.
+build:asan --per_file_copt=.*glog\+.*logging\.cc@-Wno-maybe-uninitialized
