@@ -481,4 +481,4 @@ canonical-source headers when refreshing them.
 Arduino examples are native runnable targets in their source packages. For
 example::
 
-   bazel run //examples/conditional:conditional
+   bazel run //examples/conditional
