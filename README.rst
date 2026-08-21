@@ -470,6 +470,7 @@ notice:
 .. code-block:: sh
 
    bazel test ...
+   bazel test ... --config=asan
    bazel test ... --config=roo_testing_arduino_esp32
    bazel test ... --config=roo_testing_idf_esp32
    .roo_testing/bin/test_all_profiles ...
