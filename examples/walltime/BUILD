@@ -4,5 +4,9 @@ roo_arduino_example(
     name = "walltime",
     sketch = "walltime.ino",
     visibility = ["//visibility:public"],
-    deps = ["//:roo_logging"],
+    deps = [
+        "//:roo_logging",
+        "@roo_testing//roo_testing/microcontrollers/esp32",
+        "@roo_testing//roo_testing/transducers/wifi:wifi",
+    ],
 )
