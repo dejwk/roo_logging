@@ -103,10 +103,11 @@ struct LogMessage::LogMessageData {
   //     onto std::string* message_;             // NULL or string to write
   //     message into
   //   };
-  roo_time::Uptime uptime_;      // Time of creation of LogMessage
-  roo_time::WallTime walltime_;  // Time of creation of LogMessage
-  size_t num_prefix_chars_;      // # of chars of prefix in this message
-  size_t num_chars_to_log_;      // # of chars of msg to send to log
+  roo_time::Uptime uptime_;  // Time of creation of LogMessage
+  roo_time::WallTime walltime_ =
+      roo_time::WallTime::Epoch();  // Wall time of creation of LogMessage
+  size_t num_prefix_chars_;         // # of chars of prefix in this message
+  size_t num_chars_to_log_;         // # of chars of msg to send to log
   //   size_t num_chars_to_syslog_;  // # of chars of msg to send to syslog
   const char* basename_;          // basename of file that called LOG
   const char* fullname_;          // fullname of file that called LOG
@@ -221,8 +222,8 @@ void LogMessage::Init(const char* file, int line, LogSeverity severity,
       stream() << data_->uptime_ << " ";
     } else {
       data_->walltime_ = clock->now();
-      roo_time::TimeZone tz = GET_ROO_FLAG(roo_logging_timezone);
-      roo_time::DateTime dt(data_->walltime_, tz);
+      roo_time::UtcOffset offset = GET_ROO_FLAG(roo_logging_timezone);
+      roo_time::DateTime dt(data_->walltime_, offset);
       stream() << dt;
       stream().write(' ');
     }

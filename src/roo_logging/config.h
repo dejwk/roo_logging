@@ -13,7 +13,7 @@ ROO_DECLARE_FLAG(roo_logging::WallTimeClockPtr, roo_logging_wall_time_clock);
 
 /// Which time zone to use to report wall time. Ignored if the
 /// roo_logging_wall_time_clock flag is nullptr.
-ROO_DECLARE_FLAG(roo_time::TimeZone, roo_logging_timezone);
+ROO_DECLARE_FLAG(roo_time::UtcOffset, roo_logging_timezone);
 
 /// Whether to prepend prefix (time, file, line number, etc.) in front of each
 /// log line.

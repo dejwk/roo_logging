@@ -46,7 +46,7 @@ using namespace roo_time;
 const char* ntpServer = "pool.ntp.org";
 
 // 2 hours behind UTC.
-const TimeZone kLocalTz(Hours(2));
+const UtcOffset kLocalTzOffset(Hours(2));
 
 SystemClock my_clock;
 
@@ -64,7 +64,7 @@ void setup() {
   DLOG(INFO) << "Still using uptime";
 
   SET_ROO_FLAG(roo_logging_wall_time_clock, &my_clock);
-  SET_ROO_FLAG(roo_logging_timezone, kLocalTz);
+  SET_ROO_FLAG(roo_logging_timezone, kLocalTzOffset);
 
   DLOG(INFO) << "Now using walltime";
 }
