@@ -1,3 +1,11 @@
+# roo_logging 1.5.10
+
+- Updated Bazel and PlatformIO dependencies to `roo_time` 2.0.0, `roo_backport` 1.2.4, `roo_flags` 1.2.5, and `roo_threads` 1.2.8.
+- Updated build and test dependencies to `rules_cc` 0.2.25, GoogleTest 1.18.0.bcr.1, and `roo_testing` 2.1.2; refreshed CI to match.
+- Added consolidated release notes for previous versions.
+
+---
+
 # [roo_logging 1.5.9](https://github.com/dejwk/roo_logging/releases/tag/1.5.9)
 
 Published 2026-09-19.

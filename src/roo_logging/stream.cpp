@@ -92,7 +92,7 @@ DefaultLogStream& operator<<(DefaultLogStream& s,
 DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::DateTime dt) {
   s.printf("%04d-%02d-%02dT%02d:%02d:%02d.%06d", dt.year(), dt.month(),
            dt.day(), dt.hour(), dt.minute(), dt.second(), dt.micros());
-  int tz_minutes = dt.timeZone().offset().inMinutes();
+  int tz_minutes = dt.utcOffset().inMinutes();
   if (tz_minutes != 0) {
     if (tz_minutes < 0) {
       s.write('-');
