@@ -43,9 +43,7 @@ namespace roo_logging {
 typedef void (*logging_fail_func_t)() __attribute__((noreturn));
 
 static void DebugWriteToStderr(const char* data, void*) {
-  if (fwrite(data, strlen(data), 1, stderr) < 0) {
-    // Ignore errors.
-  }
+  fwrite(data, strlen(data), 1, stderr);
 }
 
 void DumpStackTraceAndExit() {
