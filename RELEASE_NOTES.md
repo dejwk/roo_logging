@@ -1,3 +1,11 @@
+# roo_logging 1.5.11
+
+- Upgrade `roo_time` from 2.0.0 to 2.0.1 and `roo_threads` from 1.2.8 to 1.2.9 in Bazel and PlatformIO dependencies.
+- Upgrade `roo_testing` from 2.1.2 to 2.3.0.
+- Automatically select the ESP-IDF frontend for Bazel `run` commands targeting ESP-IDF examples when no frontend is explicitly configured.
+
+---
+
 # roo_logging 1.5.10
 
 - Updated Bazel and PlatformIO dependencies to `roo_time` 2.0.0, `roo_backport` 1.2.4, `roo_flags` 1.2.5, and `roo_threads` 1.2.8.
