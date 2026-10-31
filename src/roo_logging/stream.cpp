@@ -31,12 +31,40 @@
 
 #include "roo_logging/stream.h"
 
+#include "roo_time/format.h"
+
 #if (defined(ESP32) || defined(ROO_TESTING))
 #include <stdarg.h>
 #include <stdio.h>
 #endif
 
 namespace roo_logging {
+
+bool DefaultLogStream::formatDuration(roo_time::Duration duration,
+                                      const char* format) {
+  const size_t available = remaining_capacity();
+  const roo_time::FormatResult result =
+      roo_time::FormatDuration(duration, format, buf_ + pos_, available + 1);
+  if (result.status != roo_time::TextStatus::kOk &&
+      result.status != roo_time::TextStatus::kBufferTooSmall) {
+    return false;
+  }
+  pos_ += result.size < available ? result.size : available;
+  return true;
+}
+
+bool DefaultLogStream::formatUptime(roo_time::Uptime uptime,
+                                    const char* format) {
+  const size_t available = remaining_capacity();
+  const roo_time::FormatResult result =
+      roo_time::FormatUptime(uptime, format, buf_ + pos_, available + 1);
+  if (result.status != roo_time::TextStatus::kOk &&
+      result.status != roo_time::TextStatus::kBufferTooSmall) {
+    return false;
+  }
+  pos_ += result.size < available ? result.size : available;
+  return true;
+}
 
 DefaultLogStream& operator<<(DefaultLogStream& s, const char* val) {
   size_t len = strlen(val);
@@ -48,45 +76,18 @@ DefaultLogStream& operator<<(DefaultLogStream& s, const char* val) {
 }
 
 DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Uptime uptime) {
-  roo_time::Duration::Components c =
-      (uptime - roo_time::Uptime::Start()).toComponents();
-  s.printf("S%s%06d.%02d:%02d:%02d.%06d", (c.negative ? "-" : "+"), (int)c.days,
-           (int)c.hours, (int)c.minutes, (int)c.seconds, (int)c.micros);
+  s.formatUptime(uptime, roo_time::kUptimeClockMicrosFormat);
   return s;
 }
 
 DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Duration interval) {
-  s << interval.toComponents();
+  s.formatDuration(interval, roo_time::kDurationClockFormat);
   return s;
 }
 
 DefaultLogStream& operator<<(DefaultLogStream& s,
                              roo_time::Duration::Components components) {
-  bool force = false;
-  if (components.negative) s << "-";
-  if (components.days > 0) {
-    s.printf("%d.", (int)components.days);
-    force = true;
-  }
-  if (force || components.hours > 0) {
-    s.printf("%02d:", components.hours);
-    force = true;
-  }
-  if (force || components.minutes > 0) {
-    s.printf("%02d:", components.minutes);
-    force = true;
-  }
-  if (force) {
-    s.printf("%02d", components.seconds);
-  } else {
-    s.printf("%d", components.seconds);
-  }
-  if (components.micros != 0) {
-    uint32_t v = components.micros;
-    while (v % 10 == 0) v /= 10;
-    s.printf(".%d", v);
-  }
-  return s;
+  return s << roo_time::Duration::FromComponents(components);
 }
 
 DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::DateTime dt) {

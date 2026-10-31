@@ -1,6 +1,10 @@
 #include "roo_logging/config.h"
 
+#include "roo_time/format.h"
+
 ROO_FLAG(roo_logging::WallTimeClockPtr, roo_logging_wall_time_clock, nullptr);
+ROO_FLAG(roo_logging::UptimeFormat, roo_logging_uptime_format,
+         roo_time::kUptimeClockMicrosFormat);
 ROO_FLAG(roo_time::UtcOffset, roo_logging_timezone, roo_time::timezone::UTC);
 ROO_FLAG(bool, roo_logging_prefix, ROO_LOGGING_PREFIX);
 ROO_FLAG(bool, roo_logging_colorlogtostderr, ROO_LOGGING_COLORLOGTOSTDERR);

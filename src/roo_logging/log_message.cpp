@@ -43,6 +43,7 @@
 #include "roo_logging/stderr.h"
 #include "roo_threads.h"
 #include "roo_threads/mutex.h"
+#include "roo_time/format.h"
 
 namespace roo_logging {
 
@@ -219,7 +220,12 @@ void LogMessage::Init(const char* file, int line, LogSeverity severity,
     stream() << LogSeverityNames[severity][0];
     roo_time::WallTimeClock* clock = GET_ROO_FLAG(roo_logging_wall_time_clock);
     if (clock == nullptr) {
-      stream() << data_->uptime_ << " ";
+      if (!stream().formatUptime(data_->uptime_,
+                                 GET_ROO_FLAG(roo_logging_uptime_format))) {
+        stream().formatUptime(data_->uptime_,
+                              roo_time::kUptimeClockMicrosFormat);
+      }
+      stream().write(' ');
     } else {
       data_->walltime_ = clock->now();
       roo_time::UtcOffset offset = GET_ROO_FLAG(roo_logging_timezone);

@@ -41,10 +41,15 @@ namespace roo_logging {
 size_t ArduinoLogStream::printf(const char* format, ...) {
   va_list arg;
   va_start(arg, format);
-  int len = vsnprintf(buf_ + pos_, remaining_capacity(), format, arg);
+  const size_t available = remaining_capacity();
+  const int len = vsnprintf(buf_ + pos_, available + 1, format, arg);
   va_end(arg);
-  pos_ += len;
-  return len;
+  if (len <= 0) return 0;
+  const size_t written = static_cast<size_t>(len) < available
+                             ? static_cast<size_t>(len)
+                             : available;
+  pos_ += written;
+  return written;
 }
 
 }  // namespace roo_logging

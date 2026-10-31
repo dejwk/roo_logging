@@ -30,7 +30,7 @@
     "dependencies": {
         "dejwk/roo_backport": ">=1.2.4",
         "dejwk/roo_flags": ">=1.2.5",
-        "dejwk/roo_time": ">=2.0.1",
+        "dejwk/roo_time": ">=2.0.2",
         "dejwk/roo_threads": ">=1.2.9"
     }
 }

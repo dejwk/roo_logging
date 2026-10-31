@@ -63,6 +63,18 @@ static constexpr size_t kMaxLogMessageLen = 1024;
 class DefaultLogStream : public StreamBase {
  public:
   DefaultLogStream(char* buf, size_t cap) : StreamBase(buf, cap) {}
+
+  /// Appends a duration using a roo_time duration format without allocation.
+  /// Truncates to remaining capacity. Returns true for a valid format, even
+  /// when truncated, or false without advancing the stream for invalid input.
+  /// The format must not overlap the stream's buffer.
+  bool formatDuration(roo_time::Duration duration, const char* format);
+
+  /// Appends an uptime timestamp using the complete supplied format.
+  /// Uses FormatUptime without allocation. Truncates to remaining capacity.
+  /// Returns false without advancing for an invalid format; the format must
+  /// not overlap the stream's buffer.
+  bool formatUptime(roo_time::Uptime uptime, const char* format);
 };
 
 DefaultLogStream& operator<<(DefaultLogStream& s, const char* val);
@@ -138,10 +150,13 @@ inline DefaultLogStream& operator<<(DefaultLogStream& s,
 
 #endif
 
+/// Appends uptime as S+HH:MM:SS.ffffff (total hours; S- for negative values).
 DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Uptime uptime);
 
+/// Appends a duration using roo_time::kDurationClockFormat.
 DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Duration interval);
 
+/// Appends normalized components using roo_time::kDurationClockFormat.
 DefaultLogStream& operator<<(DefaultLogStream& s,
                              roo_time::Duration::Components interval);
 

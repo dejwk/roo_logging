@@ -5,11 +5,26 @@
 
 namespace roo_logging {
 using WallTimeClockPtr = ::roo_time::WallTimeClock*;
-}
+
+/// Borrowed, NUL-terminated duration format; use a literal or persistent
+/// storage.
+using UptimeFormat = const char*;
+}  // namespace roo_logging
 
 /// Which wall time clock to use. If nullptr (default), uses uptime in the logs,
 /// instead of wall time.
 ROO_DECLARE_FLAG(roo_logging::WallTimeClockPtr, roo_logging_wall_time_clock);
+
+/// Complete format for uptime timestamps in log-line prefixes.
+/// Defaults to roo_time::kUptimeClockMicrosFormat (S+HH:MM:SS.ffffff).
+/// Uses FormatDuration directives, including %+ for an explicit sign. Custom
+/// formats control the complete timestamp, including whether to show S+/S-.
+/// Null or invalid formats use the default. Include roo_time/format.h to use
+/// the named formats. Ignored when a wall-time clock is configured. Does not
+/// affect streamed values in message bodies. Keep the format alive while the
+/// flag uses it, and serialize changes with logging, as with other flags.
+/// Example: SET_ROO_FLAG(roo_logging_uptime_format, "S%+%T%F");
+ROO_DECLARE_FLAG(roo_logging::UptimeFormat, roo_logging_uptime_format);
 
 /// Which time zone to use to report wall time. Ignored if the
 /// roo_logging_wall_time_clock flag is nullptr.

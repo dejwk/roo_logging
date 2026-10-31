@@ -1,3 +1,26 @@
+# Unreleased
+
+- Duration values and normalized duration components use
+  `roo_time::kDurationClockFormat`, including correct leading fractional zeros
+  and the full signed 64-bit duration range.
+- Streamed uptime values and uptime log prefixes use `roo_time::FormatUptime`,
+  retaining `S+` (or `S-`) and replacing days with total hours:
+  `S+HH:MM:SS.ffffff`. Uptime log prefixes default to
+  `kUptimeClockMicrosFormat` (`S%+%H:%M:%S.%f`). Configure the complete format
+  with `SET_ROO_FLAG(roo_logging_uptime_format, "S%+%T%F")` or another duration
+  format. The format controls markers and sign placement; choosing a duration
+  constant without a marker omits S+/S-.
+  The format is borrowed: use a literal, a named constant, or storage that
+  outlives its use. Serialize flag updates with logging. Null or invalid
+  formats fall back to the default. Wall-clock timestamps and streamed body
+  values do not use this flag.
+- Format durations directly into the remaining stream buffer without heap
+  allocation. Bound printf cursor advancement so oversized configured prefixes
+  truncate safely before subsequent prefix fields are appended.
+- Require `roo_time` 2.0.2 for duration formatting.
+
+---
+
 # roo_logging 1.5.11
 
 - Upgrade `roo_time` from 2.0.0 to 2.0.1 and `roo_threads` from 1.2.8 to 1.2.9 in Bazel and PlatformIO dependencies.

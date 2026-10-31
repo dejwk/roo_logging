@@ -33,6 +33,7 @@ cc_test(
     size = "small",
     srcs = [
         "test/roo_logging_test.cpp",
+        "test/time_format_test.cpp",
     ],
     copts = ["-Iexternal/gtest/include"],
     includes = ["src"],
@@ -52,6 +53,7 @@ cc_test(
     size = "small",
     srcs = [
         "test/roo_logging_test.cpp",
+        "test/time_format_test.cpp",
     ],
     copts = ["-Iexternal/gtest/include"],
     includes = ["src"],
