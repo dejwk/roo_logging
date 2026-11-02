@@ -49,6 +49,9 @@ using StreamBase = roo_logging::ArduinoLogStream;
 
 using StreamBase = roo_logging::EspidfLogStream;
 
+#else
+#include "roo_logging/buffered_log_stream.h"
+using StreamBase = roo_logging::BufferedLogStream;
 #endif
 
 namespace roo_logging {

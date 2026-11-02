@@ -63,7 +63,7 @@ void ColoredWriteToStderr(LogSeverity severity, const char* message, size_t len,
     fwrite(message, len, 1, stderr);
     return;
 #else
-    printf("%s", message);
+    fwrite(message, len, 1, stderr);
     return;
 #endif
   }
@@ -79,7 +79,7 @@ void ColoredWriteToStderr(LogSeverity severity, const char* message, size_t len,
   fwrite(message, len, 1, stderr);
   fwrite("\033[m", 3, 1, stderr);  // Resets the terminal to default.
 #else
-  printf("\033[0;3%sm%s\033[m", GetAnsiColorCode(color), message);
+  fprintf(stderr, "\033[0;3%sm%s\033[m", GetAnsiColorCode(color), message);
   return;
 #endif
 }

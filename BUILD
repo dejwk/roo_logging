@@ -10,6 +10,10 @@ cc_library(
         ],
         exclude = ["test/**"],
     ),
+    copts = [
+        "-fno-exceptions",
+        "-fno-rtti",
+    ],
     includes = ["src"],
     visibility = ["//visibility:public"],
     deps = [
@@ -32,11 +36,15 @@ cc_test(
     name = "roo_logging_test",
     size = "small",
     srcs = [
+        "test/buffered_log_stream_test.cpp",
         "test/check_message_test.cpp",
         "test/roo_logging_test.cpp",
         "test/time_format_test.cpp",
     ],
-    copts = ["-Iexternal/gtest/include"],
+    copts = [
+        "-Iexternal/gtest/include",
+        "-fno-rtti",
+    ],
     includes = ["src"],
     linkstatic = 1,
     target_compatible_with = [
@@ -53,11 +61,15 @@ cc_test(
     name = "roo_logging_linux_test",
     size = "small",
     srcs = [
+        "test/buffered_log_stream_test.cpp",
         "test/check_message_test.cpp",
         "test/roo_logging_test.cpp",
         "test/time_format_test.cpp",
     ],
-    copts = ["-Iexternal/gtest/include"],
+    copts = [
+        "-Iexternal/gtest/include",
+        "-fno-rtti",
+    ],
     includes = ["src"],
     linkstatic = 1,
     deps = [

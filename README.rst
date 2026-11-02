@@ -482,3 +482,12 @@ Arduino examples are native runnable targets in their source packages. For
 example::
 
    bazel run //examples/conditional
+
+
+Portable buffered logging
+-------------------------
+
+SDK-only Pico and plain host logging use a framework-independent buffered
+formatter. Arduino retains its Print-compatible stream; IDF shares the portable
+formatter through the existing EspidfLogStream name. Zero capacity accepts no
+output, and integer formatting supports signed and unsigned 64-bit values.
