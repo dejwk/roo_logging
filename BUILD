@@ -32,6 +32,7 @@ cc_test(
     name = "roo_logging_test",
     size = "small",
     srcs = [
+        "test/check_message_test.cpp",
         "test/roo_logging_test.cpp",
         "test/time_format_test.cpp",
     ],
@@ -52,6 +53,7 @@ cc_test(
     name = "roo_logging_linux_test",
     size = "small",
     srcs = [
+        "test/check_message_test.cpp",
         "test/roo_logging_test.cpp",
         "test/time_format_test.cpp",
     ],

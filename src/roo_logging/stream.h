@@ -199,7 +199,9 @@ inline DefaultLogStream& operator<<(
   return fn(s);
 }
 
-class OStringStream : public DefaultLogStream {
+/// Owns the fixed buffer used to construct an independent check-message string.
+/// This concrete stream is a leaf and is deleted through OStringStream*.
+class OStringStream final : public DefaultLogStream {
  public:
   OStringStream() : DefaultLogStream(val_, kMaxLogMessageLen) {}
 
