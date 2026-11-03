@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   build_and_test:
-    uses: dejwk/roo_testing/.github/workflows/client-ci.yml@95ecaae3c28b3b6a46f65b215029a4d30a587606 # roo_testing 2.1.2
+    uses: dejwk/roo_testing/.github/workflows/client-ci.yml@bc713e1ab7598be49b79ba5d9f69e7df59590814 # Pico filesystem/profile support
     with:
-      profiles: '["arduino", "idf"]'
+      profiles: '["arduino", "idf", "arduino_esp32s3", "idf_esp32s3", "arduino_esp32c3", "idf_esp32c3", "pico_rp2040", "arduino_rp2040", "arduino_rp2040_freertos"]'
       run_tests: true

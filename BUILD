@@ -72,6 +72,10 @@ cc_test(
     ],
     includes = ["src"],
     linkstatic = 1,
+    target_compatible_with = select({
+        "@roo_testing//roo_testing/platforms:is_arduino": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
     deps = [
         ":roo_logging",
         "@googletest//:gtest_main",

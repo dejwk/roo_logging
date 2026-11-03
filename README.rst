@@ -463,7 +463,8 @@ the specified integer value.
 Host emulation
 --------------
 
-Host builds support both Arduino and ESP-IDF through roo_testing 2.0. With
+Host builds support nine canonical profiles through roo_testing 2.5: Arduino
+and ESP-IDF on ESP32/S3/C3, SDK-only Pico, and Arduino-Pico bare-metal/FreeRTOS. With
 Bazelisk 1.21 or newer, a plain command defaults to Arduino and prints a
 notice:
 

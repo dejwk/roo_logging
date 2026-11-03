@@ -1,4 +1,7 @@
-# Unreleased
+# roo_logging 1.6.0
+
+- Add a portable bounded logging stream for SDK-only targets, preserving integer ranges and stderr diagnostics.
+- Exercise all nine canonical emulation profiles in CI.
 
 - Duration values and normalized duration components use
   `roo_time::kDurationClockFormat`, including correct leading fractional zeros
