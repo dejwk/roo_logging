@@ -37,51 +37,49 @@
 #include "roo_logging/config.h"
 #include "roo_logging/log_severity.h"
 
-#if defined(ESP_PLATFORM)
-#include "rom/ets_sys.h"
+#if defined(ESP_PLATFORM) && !defined(__linux__)
+#include "esp_idf_version.h"
+#include "esp_rom_sys.h"
+#include "esp_rom_uart.h"
 #endif
 
 namespace roo_logging {
 namespace {
 
+// Writes already formatted bytes, including before stdio is initialized.
+void WriteToStderr(const char* message, size_t len,
+                   bool from_static_initializer) {
+#if defined(ESP_PLATFORM) && !defined(__linux__)
+  if (from_static_initializer) {
+    for (size_t i = 0; i < len; ++i) {
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 4, 0)
+      esp_rom_output_to_channels(message[i]);
+#elif ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
+      esp_rom_output_putc(message[i]);
+#else
+      esp_rom_uart_putc(message[i]);
+#endif
+    }
+    return;
+  }
+#endif
+  // Use stdio after initialization so USB/JTAG stderr routing is respected.
+  fwrite(message, len, 1, stderr);
+}
+
 void ColoredWriteToStderr(LogSeverity severity, const char* message, size_t len,
                           bool from_static_initializer) {
   bool coloring = GET_ROO_FLAG(roo_logging_colorlogtostderr);
   LogColor color = coloring ? SeverityToColor(severity) : COLOR_DEFAULT;
-  if (color == COLOR_DEFAULT) {
-#if (defined ESP_PLATFORM)
-#if !defined(__linux__)
-    // Note: emulated ets_printf would write to stdout, not stderr.
-    if (from_static_initializer) {
-      // stderr might not yet be initialized. Write directly to UART.
-      ets_printf("%s", message);
-      return;
-    }
-#endif
-    // Not using ets_printf in general, because it assumes UART0, which doesn't
-    // work well with JTAG debugging which sends stderr over USB.
-    fwrite(message, len, 1, stderr);
-    return;
-#else
-    fwrite(message, len, 1, stderr);
-    return;
-#endif
+  if (color != COLOR_DEFAULT) {
+    WriteToStderr("\033[0;3", 5, from_static_initializer);
+    WriteToStderr(GetAnsiColorCode(color), 1, from_static_initializer);
+    WriteToStderr("m", 1, from_static_initializer);
   }
-#if (defined ESP_PLATFORM)
-  if (from_static_initializer) {
-    // stderr might not yet be initialized. Write directly to UART.
-    ets_printf("\033[0;3%sm%s\033[m", GetAnsiColorCode(color), message);
-    return;
+  WriteToStderr(message, len, from_static_initializer);
+  if (color != COLOR_DEFAULT) {
+    WriteToStderr("\033[m", 3, from_static_initializer);
   }
-  fwrite("\033[0;3", 5, 1, stderr);
-  fwrite(GetAnsiColorCode(color), 1, 1, stderr);
-  fwrite("m", 1, 1, stderr);
-  fwrite(message, len, 1, stderr);
-  fwrite("\033[m", 3, 1, stderr);  // Resets the terminal to default.
-#else
-  fprintf(stderr, "\033[0;3%sm%s\033[m", GetAnsiColorCode(color), message);
-  return;
-#endif
 }
 
 }  // namespace

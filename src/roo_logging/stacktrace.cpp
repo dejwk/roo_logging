@@ -31,6 +31,7 @@
 
 #include "roo_logging/stacktrace.h"
 
+#include <cstdint>
 #include <cstring>
 
 #include "roo_logging/symbolize.h"
@@ -38,6 +39,8 @@
 #if defined(__linux__)
 
 #include <execinfo.h>
+
+#include "roo_logging/stream.h"
 
 namespace roo_logging {
 
@@ -60,14 +63,26 @@ int GetStackTrace(void** result, int max_depth, int skip_count) {
 
 namespace {
 
-// The %p field width for printf() functions is two characters per byte.
-// For some environments, add two extra bytes for the leading "0x".
-static const int kPrintfPointerFieldWidth = 2 + 2 * sizeof(void*);
+// Keeps stack addresses right-aligned to the historical pointer field width.
+void AppendPC(DefaultLogStream& stream, const char* prefix, void* pc) {
+  uintptr_t value = reinterpret_cast<uintptr_t>(pc);
+  size_t digits = 1;
+  while (value >= 16) {
+    value >>= 4;
+    ++digits;
+  }
+  stream << prefix << "@ ";
+  for (size_t i = digits; i < 2 * sizeof(void*); ++i) stream.write(' ');
+  stream << pc;
+}
 
 void DumpPC(DebugWriter* writerfn, void* arg, void* pc,
             const char* const prefix) {
   char buf[100];
-  snprintf(buf, sizeof(buf), "%s@ %*p\n", prefix, kPrintfPointerFieldWidth, pc);
+  DefaultLogStream stream(buf, sizeof(buf));
+  AppendPC(stream, prefix, pc);
+  stream << '\n';
+  buf[stream.pcount()] = '\0';
   writerfn(buf, arg);
 }
 
@@ -84,8 +99,10 @@ static void DumpPCAndSymbol(DebugWriter* writerfn, void* arg, void* pc,
     symbol = tmp;
   }
   char buf[1024];
-  snprintf(buf, sizeof(buf), "%s@ %*p  %s\n", prefix, kPrintfPointerFieldWidth,
-           pc, symbol);
+  DefaultLogStream stream(buf, sizeof(buf));
+  AppendPC(stream, prefix, pc);
+  stream << "  " << symbol << '\n';
+  buf[stream.pcount()] = '\0';
   writerfn(buf, arg);
 }
 #endif
@@ -122,7 +139,7 @@ void DumpStackTrace(int skip_count, DebugWriter* writerfn, void* arg) {
 #include "esp_attr.h"
 #include "esp_debug_helpers.h"
 #include "esp_err.h"
-#include "esp_rom_sys.h"
+#include "esp_rom_uart.h"
 #include "esp_types.h"
 #include "sdkconfig.h"
 #include "soc/cpu.h"
@@ -134,8 +151,23 @@ void DumpStackTrace(int skip_count, DebugWriter* writerfn, void* arg) {
 
 namespace roo_logging {
 
-static void IRAM_ATTR print_entry(uint32_t pc, uint32_t sp) {
-  esp_rom_printf("0x%08X:0x%08X", pc, sp);
+// Emits diagnostic text directly through the ROM console before stdio is safe.
+static void IRAM_ATTR WriteRom(const char* text) {
+  while (*text != '\0') esp_rom_uart_putc(*text++);
+}
+
+// Preserves the eight uppercase hexadecimal digits used by ESP backtraces.
+static void IRAM_ATTR WriteHex(uint32_t value) {
+  WriteRom("0x");
+  for (int shift = 28; shift >= 0; shift -= 4) {
+    esp_rom_uart_putc("0123456789ABCDEF"[(value >> shift) & 0xf]);
+  }
+}
+
+static void IRAM_ATTR PrintEntry(uint32_t pc, uint32_t sp) {
+  WriteHex(pc);
+  WriteRom(":");
+  WriteHex(sp);
 }
 
 void DumpStackTrace(int skip_count, DebugWriter* writerfn, void* arg) {
@@ -147,8 +179,8 @@ void DumpStackTrace(int skip_count, DebugWriter* writerfn, void* arg) {
   auto frame = &start;
   memcpy(&stk_frame, frame, sizeof(esp_backtrace_frame_t));
 
-  print_entry(esp_cpu_process_stack_pc(stk_frame.pc), stk_frame.sp);
-  esp_rom_printf("\n");
+  PrintEntry(esp_cpu_process_stack_pc(stk_frame.pc), stk_frame.sp);
+  WriteRom("\n");
 
   // Check if first frame is valid
   bool corrupted =
@@ -164,19 +196,19 @@ void DumpStackTrace(int skip_count, DebugWriter* writerfn, void* arg) {
     if (!esp_backtrace_get_next_frame(&stk_frame)) {  // Get previous
       corrupted = true;
     }
-    print_entry(esp_cpu_process_stack_pc(stk_frame.pc), stk_frame.sp);
-    esp_rom_printf("\n");
+    PrintEntry(esp_cpu_process_stack_pc(stk_frame.pc), stk_frame.sp);
+    WriteRom("\n");
   }
 
   // Print backtrace termination marker
   esp_err_t ret = ESP_OK;
   if (corrupted) {
-    esp_rom_printf(" |<-CORRUPTED");
+    WriteRom(" |<-CORRUPTED");
     ret = ESP_FAIL;
   } else if (stk_frame.next_pc != 0) {  // Backtrace continues
-    esp_rom_printf(" |<-CONTINUES");
+    WriteRom(" |<-CONTINUES");
   }
-  esp_rom_printf("\r\n\r\n");
+  WriteRom("\r\n\r\n");
 }
 
 }  // namespace roo_logging

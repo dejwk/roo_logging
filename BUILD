@@ -38,6 +38,7 @@ cc_test(
     srcs = [
         "test/buffered_log_stream_test.cpp",
         "test/check_message_test.cpp",
+        "test/diagnostic_output_test.cpp",
         "test/roo_logging_test.cpp",
         "test/stream_format_test.cpp",
         "test/time_format_test.cpp",
@@ -64,6 +65,7 @@ cc_test(
     srcs = [
         "test/buffered_log_stream_test.cpp",
         "test/check_message_test.cpp",
+        "test/diagnostic_output_test.cpp",
         "test/roo_logging_test.cpp",
         "test/stream_format_test.cpp",
         "test/time_format_test.cpp",
