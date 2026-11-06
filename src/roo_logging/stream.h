@@ -163,6 +163,9 @@ DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Duration interval);
 DefaultLogStream& operator<<(DefaultLogStream& s,
                              roo_time::Duration::Components interval);
 
+/// Appends YYYY-MM-DDTHH:MM:SS.ffffff, followed by +/-HH:MM for nonzero
+/// offsets. Uses decimal fields regardless of the selected base, without
+/// printf.
 DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::DateTime dt);
 
 // Output the COUNTER value.

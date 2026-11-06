@@ -35,12 +35,28 @@
 
 #include "roo_time/format.h"
 
-#if (defined(ESP32) || defined(ROO_TESTING))
-#include <stdarg.h>
-#include <stdio.h>
-#endif
-
 namespace roo_logging {
+namespace {
+
+// Appends decimal fields independently of the stream's selected integer base.
+void AppendPaddedDecimal(DefaultLogStream& stream, uint32_t value,
+                         size_t width) {
+  char digits[10];
+  char* end = digits + sizeof(digits);
+  char* current = end;
+  do {
+    *--current = '0' + value % 10;
+    value /= 10;
+  } while (value != 0);
+  const size_t count = end - current;
+  while (width > count) {
+    stream.write('0');
+    --width;
+  }
+  stream.write(current, count);
+}
+
+}  // namespace
 
 bool DefaultLogStream::formatDuration(roo_time::Duration duration,
                                       const char* format) {
@@ -107,8 +123,19 @@ DefaultLogStream& operator<<(DefaultLogStream& s, const void* ptr) {
 }
 
 DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::DateTime dt) {
-  s.printf("%04d-%02d-%02dT%02d:%02d:%02d.%06d", dt.year(), dt.month(),
-           dt.day(), dt.hour(), dt.minute(), dt.second(), dt.micros());
+  AppendPaddedDecimal(s, dt.year(), 4);
+  s.write('-');
+  AppendPaddedDecimal(s, dt.month(), 2);
+  s.write('-');
+  AppendPaddedDecimal(s, dt.day(), 2);
+  s.write('T');
+  AppendPaddedDecimal(s, dt.hour(), 2);
+  s.write(':');
+  AppendPaddedDecimal(s, dt.minute(), 2);
+  s.write(':');
+  AppendPaddedDecimal(s, dt.second(), 2);
+  s.write('.');
+  AppendPaddedDecimal(s, dt.micros(), 6);
   int tz_minutes = dt.utcOffset().inMinutes();
   if (tz_minutes != 0) {
     if (tz_minutes < 0) {
@@ -117,7 +144,9 @@ DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::DateTime dt) {
     } else {
       s.write('+');
     }
-    s.printf("%02d:%02d", tz_minutes / 60, tz_minutes % 60);
+    AppendPaddedDecimal(s, tz_minutes / 60, 2);
+    s.write(':');
+    AppendPaddedDecimal(s, tz_minutes % 60, 2);
   }
   return s;
 }
