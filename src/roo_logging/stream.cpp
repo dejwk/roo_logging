@@ -31,6 +31,8 @@
 
 #include "roo_logging/stream.h"
 
+#include <cstdint>
+
 #include "roo_time/format.h"
 
 #if (defined(ESP32) || defined(ROO_TESTING))
@@ -88,6 +90,20 @@ DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::Duration interval) {
 DefaultLogStream& operator<<(DefaultLogStream& s,
                              roo_time::Duration::Components components) {
   return s << roo_time::Duration::FromComponents(components);
+}
+
+DefaultLogStream& operator<<(DefaultLogStream& s, const void* ptr) {
+  uintptr_t value = reinterpret_cast<uintptr_t>(ptr);
+  char digits[2 * sizeof(value)];
+  char* end = digits + sizeof(digits);
+  char* current = end;
+  do {
+    *--current = "0123456789abcdef"[value & 0xf];
+    value >>= 4;
+  } while (value != 0);
+  s << "0x";
+  s.write(current, end - current);
+  return s;
 }
 
 DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::DateTime dt) {

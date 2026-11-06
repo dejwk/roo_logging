@@ -172,10 +172,9 @@ inline DefaultLogStream& operator<<(DefaultLogStream& os,
   return os;
 }
 
-inline DefaultLogStream& operator<<(DefaultLogStream& os, const void* ptr) {
-  os.printf("%p", ptr);
-  return os;
-}
+/// Appends an address as lowercase hexadecimal with a 0x prefix (null is 0x0).
+/// Ignores the selected integer base and uses no printf formatting.
+DefaultLogStream& operator<<(DefaultLogStream& os, const void* ptr);
 
 inline DefaultLogStream& dec(DefaultLogStream& stream) {
   stream.setBase(10);
@@ -302,7 +301,7 @@ inline roo_logging::DefaultLogStream& operator<<(
 }
 
 inline DefaultLogStream& operator<<(DefaultLogStream& s, std::nullptr_t t) {
-  s.printf("%p", t);
+  s << static_cast<const void*>(t);
   return s;
 }
 

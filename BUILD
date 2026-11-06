@@ -39,6 +39,7 @@ cc_test(
         "test/buffered_log_stream_test.cpp",
         "test/check_message_test.cpp",
         "test/roo_logging_test.cpp",
+        "test/stream_format_test.cpp",
         "test/time_format_test.cpp",
     ],
     copts = [
@@ -64,6 +65,7 @@ cc_test(
         "test/buffered_log_stream_test.cpp",
         "test/check_message_test.cpp",
         "test/roo_logging_test.cpp",
+        "test/stream_format_test.cpp",
         "test/time_format_test.cpp",
     ],
     copts = [
