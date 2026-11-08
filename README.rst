@@ -492,3 +492,17 @@ SDK-only Pico and plain host logging use a framework-independent buffered
 formatter. Arduino retains its Print-compatible stream; IDF shares the portable
 formatter through the existing EspidfLogStream name. Zero capacity accepts no
 output, and integer formatting supports signed and unsigned 64-bit values.
+
+Floating-point logging
+----------------------
+
+Streamed ``float`` and ``double`` values use general notation with up to six
+significant digits, matching the default ``%g`` precision. IEEE binary32 and
+binary64 doubles use compact exact integer conversion without printf, heap
+allocation, large lookup tables, or a C++17 requirement. Conversion rounds to
+nearest with ties to even, uses a decimal point independently of locale, and
+preserves signed zero, infinities, and NaNs. Other double representations
+retain ``printf("%g", value)``.
+
+Output truncates to the remaining stream capacity. Explicit calls to
+``stream.printf`` retain their usual formatting behavior.

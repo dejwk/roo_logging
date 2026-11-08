@@ -2,6 +2,10 @@
 
 - Add a portable bounded logging stream for SDK-only targets, preserving integer ranges and stderr diagnostics.
 - Exercise all nine canonical emulation profiles in CI.
+- Format streamed floating-point values with compact exact integer conversion
+  for IEEE binary32/binary64 doubles. Preserve six significant digits and
+  bounded truncation without printf, heap allocation, large lookup tables, or
+  a C++17 requirement. Other double representations retain the printf fallback.
 
 - Duration values and normalized duration components use
   `roo_time::kDurationClockFormat`, including correct leading fractional zeros

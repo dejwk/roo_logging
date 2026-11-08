@@ -127,15 +127,15 @@ inline DefaultLogStream& operator<<(DefaultLogStream& s, unsigned long val) {
   return s;
 }
 
-inline DefaultLogStream& operator<<(DefaultLogStream& s, float val) {
-  s.printf("%g", val);
-  return s;
-}
+/// Appends a float in general notation with up to six significant digits.
+/// Ignores the selected integer base and truncates to remaining capacity.
+DefaultLogStream& operator<<(DefaultLogStream& s, float val);
 
-inline DefaultLogStream& operator<<(DefaultLogStream& s, double val) {
-  s.printf("%g", val);
-  return s;
-}
+/// Appends a double in general notation with up to six significant digits.
+/// Uses compact integer conversion for IEEE binary32/binary64 doubles,
+/// otherwise printf. Ignores the selected integer base and truncates to
+/// remaining capacity.
+DefaultLogStream& operator<<(DefaultLogStream& s, double val);
 
 inline DefaultLogStream& operator<<(DefaultLogStream& s,
                                     unsigned long long val) {

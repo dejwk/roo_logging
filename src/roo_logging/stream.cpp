@@ -33,6 +33,7 @@
 
 #include <cstdint>
 
+#include "roo_logging/internal/float_format.h"
 #include "roo_time/format.h"
 
 namespace roo_logging {
@@ -90,6 +91,22 @@ DefaultLogStream& operator<<(DefaultLogStream& s, const char* val) {
   if (len > cap) len = cap;
   memcpy(&s.buf_[s.pos_], val, len);
   s.pos_ += len;
+  return s;
+}
+
+DefaultLogStream& operator<<(DefaultLogStream& s, float val) {
+  return s << static_cast<double>(val);
+}
+
+DefaultLogStream& operator<<(DefaultLogStream& s, double val) {
+  if (s.full()) return s;
+#if ROO_LOGGING_HAS_COMPACT_FLOAT
+  char text[internal::kFloatBufferSize];
+  const size_t size = internal::FormatFloat(val, text);
+  s.write(text, size);
+#else
+  s.printf("%g", val);
+#endif
   return s;
 }
 
