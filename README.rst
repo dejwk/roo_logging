@@ -65,7 +65,8 @@ The ``DFATAL`` severity logs a ``FATAL`` error in debug mode (i.e.,
 there is no ``NDEBUG`` macro defined), but avoids halting the program in
 production by automatically reducing the severity to ``ERROR``.
 
-By default, roo_logging writes to the default Serial interface.
+roo_logging writes to standard error (``stderr``). On ESP32, messages emitted
+during static initialization use the ROM console.
 
 Configuration
 ~~~~~~~~~~~~~
@@ -82,12 +83,17 @@ The following flags are most commonly used:
    Use the specified wall time clock to determine absolute time. If nullptr,
    logs using relative time (i.e. time since program start).
 
-``roo_logging_timezone`` (``roo_time::TimeZone``, default=roo_time::UTC)
+``roo_logging_uptime_format`` (``const char*``, default=``roo_time::kUptimeClockMicrosFormat``)
+   Format uptime prefixes as ``S+HH:MM:SS.ffffff`` by default. Hours are the
+   total hours since boot. Use a string literal or other persistent storage
+   for a custom format, and serialize changes with logging.
+
+``roo_logging_timezone`` (``roo_time::UtcOffset``, default=``roo_time::timezone::UTC``)
    Use the specified time zone when reporting time in log messages. Ignored
    if ``roo_logging_wall_time_clock`` is nullptr.
 
 ``roo_logging_colorlogtostderr`` (``bool``, default=false)
-   If set, uses ANSI sequences to color log messages sent to Serial.
+   If set, uses ANSI sequences to color console output.
    You need to configure the console to recognize color input
    (e.g., if using PlatformIO, set ``monitor_raw = yes`` in ``platformio.ini``.)
 
@@ -95,7 +101,7 @@ The following flags are most commonly used:
    If set, when running on a FreeRTOS-based system (e.g. ESP32), includes FreeRTOS core ID
    in the log message prefix.
 
-You can set flag values in your program, using the ``SET_ROO_GLOG(flag_name, value)``
+You can set flag values in your program, using the ``SET_ROO_FLAG(flag_name, value)``
 macro. Most settings start working immediately after the update.
 
 You can also set the default values for some of these flags at compile time by

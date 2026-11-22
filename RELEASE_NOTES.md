@@ -1,12 +1,16 @@
 # roo_logging 1.6.0
 
 - Add a portable bounded logging stream for SDK-only targets, preserving integer ranges and stderr diagnostics.
+- Emit ordinary log messages on standard error. Non-ESP targets previously
+  sent those messages to standard output.
+- Write addresses as lowercase hexadecimal with a `0x` prefix and null
+  pointers as `0x0` across platforms. Update log parsers that expect a
+  platform-specific spelling such as `(nil)`.
 - Exercise all nine canonical emulation profiles in CI.
 - Format streamed floating-point values with compact exact integer conversion
   for IEEE binary32/binary64 doubles. Preserve six significant digits and
   bounded truncation without printf, heap allocation, large lookup tables, or
   a C++17 requirement. Other double representations retain the printf fallback.
-
 - Duration values and normalized duration components use
   `roo_time::kDurationClockFormat`, including correct leading fractional zeros
   and the full signed 64-bit duration range.
@@ -24,7 +28,8 @@
 - Format durations directly into the remaining stream buffer without heap
   allocation. Bound printf cursor advancement so oversized configured prefixes
   truncate safely before subsequent prefix fields are appended.
-- Require `roo_time` 2.0.2 for duration formatting.
+- The Bazel and PlatformIO manifests require `roo_time` 2.1.0 and
+  `roo_threads` 1.3.0 or later.
 
 ---
 
