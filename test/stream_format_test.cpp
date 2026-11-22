@@ -146,14 +146,39 @@ TEST(LoggingFloatingPoint, BoundedAppend) {
   }
 }
 
-#if !defined(ARDUINO)
-// Verifies a portable stream with no storage accepts floating-point insertion.
-TEST(LoggingFloatingPoint, ZeroCapacity) {
-  DefaultLogStream stream(nullptr, 0);
-  stream << 1.25f << 1.25;
-  EXPECT_EQ(0, stream.pcount());
-}
+// Verifies real appends are discarded on both backends, with either a null
+// buffer or a guard byte, while time format validation still reports errors.
+TEST(LoggingStream, ZeroCapacity) {
+  char guard = 'z';
+  for (char* buffer : {&guard, static_cast<char*>(nullptr)}) {
+    DefaultLogStream stream(buffer, 0);
+    ASSERT_TRUE(stream.full());
+    stream << 'x' << "text" << roo::string_view("view") << std::string("string")
+           << 42 << 1.25f << 1.25 << nullptr << roo_time::Seconds(1)
+           << roo_time::Uptime::Start() << roo_time::DateTime();
+#if defined(ARDUINO)
+    stream << String("arduino");
+    Print& print = stream;
+    EXPECT_EQ(0u, print.write(static_cast<uint8_t>('x')));
 #endif
+    EXPECT_EQ(0u, stream.printf("%s", "printf"));
+    EXPECT_TRUE(stream.formatDuration(roo_time::Seconds(1), "%T"));
+    EXPECT_TRUE(stream.formatUptime(roo_time::Uptime::Start(), "S%+%T"));
+    EXPECT_FALSE(stream.formatDuration(roo_time::Seconds(1), "%Q"));
+    EXPECT_FALSE(stream.formatUptime(roo_time::Uptime::Start(), nullptr));
+    EXPECT_EQ(0, stream.pcount());
+    EXPECT_EQ('z', guard);
+  }
+}
+
+// Verifies an empty view with no data can be inserted into available storage.
+TEST(LoggingStream, EmptyStringView) {
+  char text[] = "guard";
+  DefaultLogStream stream(text, sizeof(text));
+  stream << roo::string_view();
+  EXPECT_EQ(0, stream.pcount());
+  EXPECT_STREQ("guard", text);
+}
 
 // Verifies pointer formatting preserves every address bit and ignores the
 // selected integer base without changing it for subsequent values.

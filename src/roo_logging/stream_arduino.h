@@ -13,9 +13,11 @@ namespace roo_logging {
 
 class ArduinoLogStream : public Print {
  public:
+  /// Uses @p buf with @p cap bytes, reserving one byte for a terminator.
+  /// A zero capacity permits a null buffer and accepts no output.
   ArduinoLogStream(char* buf, size_t cap)
       : buf_(buf), pos_(0), cap_(cap), number_base_(10), ctr_(0) {}
-  size_t remaining_capacity() const { return cap_ - pos_ - 1; }
+  size_t remaining_capacity() const { return cap_ == 0 ? 0 : cap_ - pos_ - 1; }
   bool full() const { return remaining_capacity() == 0; }
 
   void setBase(int base) {
@@ -38,7 +40,7 @@ class ArduinoLogStream : public Print {
   size_t write(const char* buf, size_t len) {
     size_t cap = remaining_capacity();
     if (len > cap) len = cap;
-    memcpy(&buf_[pos_], buf, len);
+    if (len != 0) memcpy(buf_ + pos_, buf, len);
     pos_ += len;
     return len;
   }

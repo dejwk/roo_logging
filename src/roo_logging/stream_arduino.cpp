@@ -39,6 +39,7 @@ namespace roo_logging {
 
 // Optimized version of printf.
 size_t ArduinoLogStream::printf(const char* format, ...) {
+  if (cap_ == 0) return 0;
   va_list arg;
   va_start(arg, format);
   const size_t available = remaining_capacity();

@@ -62,8 +62,9 @@ void AppendPaddedDecimal(DefaultLogStream& stream, uint32_t value,
 bool DefaultLogStream::formatDuration(roo_time::Duration duration,
                                       const char* format) {
   const size_t available = remaining_capacity();
+  char* output = cap_ == 0 ? nullptr : buf_ + pos_;
   const roo_time::FormatResult result =
-      roo_time::FormatDuration(duration, format, buf_ + pos_, available + 1);
+      roo_time::FormatDuration(duration, format, output, cap_ - pos_);
   if (result.status != roo_time::TextStatus::kOk &&
       result.status != roo_time::TextStatus::kBufferTooSmall) {
     return false;
@@ -75,8 +76,9 @@ bool DefaultLogStream::formatDuration(roo_time::Duration duration,
 bool DefaultLogStream::formatUptime(roo_time::Uptime uptime,
                                     const char* format) {
   const size_t available = remaining_capacity();
+  char* output = cap_ == 0 ? nullptr : buf_ + pos_;
   const roo_time::FormatResult result =
-      roo_time::FormatUptime(uptime, format, buf_ + pos_, available + 1);
+      roo_time::FormatUptime(uptime, format, output, cap_ - pos_);
   if (result.status != roo_time::TextStatus::kOk &&
       result.status != roo_time::TextStatus::kBufferTooSmall) {
     return false;
@@ -86,11 +88,7 @@ bool DefaultLogStream::formatUptime(roo_time::Uptime uptime,
 }
 
 DefaultLogStream& operator<<(DefaultLogStream& s, const char* val) {
-  size_t len = strlen(val);
-  size_t cap = s.remaining_capacity();
-  if (len > cap) len = cap;
-  memcpy(&s.buf_[s.pos_], val, len);
-  s.pos_ += len;
+  s.write(val, strlen(val));
   return s;
 }
 
@@ -172,11 +170,7 @@ DefaultLogStream& operator<<(DefaultLogStream& s, roo_time::DateTime dt) {
 
 roo_logging::DefaultLogStream& operator<<(roo_logging::DefaultLogStream& s,
                                           const ::String& val) {
-  size_t len = val.length();
-  size_t cap = s.remaining_capacity();
-  if (len > cap) len = cap;
-  memcpy(&s.buf_[s.pos_], val.c_str(), len);
-  s.pos_ += len;
+  s.write(val.c_str(), val.length());
   return s;
 }
 

@@ -65,6 +65,8 @@ static constexpr size_t kMaxLogMessageLen = 1024;
 
 class DefaultLogStream : public StreamBase {
  public:
+  /// Uses @p buf with @p cap bytes, reserving one byte for a terminator.
+  /// A zero capacity permits a null buffer and accepts no output.
   DefaultLogStream(char* buf, size_t cap) : StreamBase(buf, cap) {}
 
   /// Appends a duration using a roo_time duration format without allocation.
@@ -295,11 +297,7 @@ inline roo_logging::DefaultLogStream& operator<<(
 
 inline roo_logging::DefaultLogStream& operator<<(
     roo_logging::DefaultLogStream& s, roo::string_view val) {
-  size_t len = val.size();
-  size_t cap = s.remaining_capacity();
-  if (len > cap) len = cap;
-  memcpy(&s.buf_[s.pos_], val.data(), len);
-  s.pos_ += len;
+  s.write(val.data(), val.size());
   return s;
 }
 
@@ -317,11 +315,7 @@ namespace roo_logging {
 
 inline roo_logging::DefaultLogStream& operator<<(
     roo_logging::DefaultLogStream& s, const ::std::string& val) {
-  size_t len = val.size();
-  size_t cap = s.remaining_capacity();
-  if (len > cap) len = cap;
-  memcpy(&s.buf_[s.pos_], val.data(), len);
-  s.pos_ += len;
+  s.write(val.data(), val.size());
   return s;
 }
 
