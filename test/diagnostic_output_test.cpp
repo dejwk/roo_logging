@@ -73,13 +73,15 @@ TEST_F(LoggingStderrTest, StaticInitializerUsesStderrOnHost) {
 TEST(LoggingStartup, IgnoresTaskQueuedBeforeSchedulerStarts) {
   EXPECT_EXIT(
       {
-        if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED)
+        if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
           std::_Exit(1);
+        }
         TaskHandle_t pending_task = nullptr;
         const BaseType_t result =
             xTaskCreate([](void*) {}, "pending", configMINIMAL_STACK_SIZE,
                         nullptr, tskIDLE_PRIORITY, &pending_task);
-        if (result != pdPASS || xTaskGetCurrentTaskHandle() != pending_task) {
+        if (result != pdPASS || pending_task == nullptr ||
+            xTaskGetCurrentTaskHandle() != pending_task) {
           std::_Exit(2);
         }
 
