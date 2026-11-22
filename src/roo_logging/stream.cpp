@@ -34,6 +34,7 @@
 #include <cstdint>
 
 #include "roo_logging/internal/float_format.h"
+#include "roo_time.h"
 #include "roo_time/format.h"
 
 namespace roo_logging {

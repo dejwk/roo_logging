@@ -3,6 +3,7 @@
 
 #include "gtest/gtest.h"
 #include "roo_logging.h"
+#include "roo_time.h"
 #include "roo_time/format.h"
 
 namespace roo_logging {

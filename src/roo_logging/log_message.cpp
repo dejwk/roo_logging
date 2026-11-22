@@ -43,6 +43,7 @@
 #include "roo_logging/stderr.h"
 #include "roo_threads.h"
 #include "roo_threads/mutex.h"
+#include "roo_time.h"
 #include "roo_time/format.h"
 
 namespace roo_logging {

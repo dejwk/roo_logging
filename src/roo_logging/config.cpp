@@ -1,5 +1,6 @@
 #include "roo_logging/config.h"
 
+#include "roo_time.h"
 #include "roo_time/format.h"
 
 ROO_FLAG(roo_logging::WallTimeClockPtr, roo_logging_wall_time_clock, nullptr);
