@@ -1,35 +1,13 @@
 # roo_logging 1.6.0
 
-- Add a portable bounded logging stream for SDK-only targets, preserving integer ranges and stderr diagnostics.
-- Emit ordinary log messages on standard error. Non-ESP targets previously
-  sent those messages to standard output.
-- Write addresses as lowercase hexadecimal with a `0x` prefix and null
-  pointers as `0x0` across platforms. Update log parsers that expect a
-  platform-specific spelling such as `(nil)`.
-- Exercise all nine canonical emulation profiles in CI.
-- Format streamed floating-point values with compact exact integer conversion
-  for IEEE binary32/binary64 doubles. Preserve six significant digits and
-  bounded truncation without printf, heap allocation, large lookup tables, or
-  a C++17 requirement. Other double representations retain the printf fallback.
-- Duration values and normalized duration components use
-  `roo_time::kDurationClockFormat`, including correct leading fractional zeros
-  and the full signed 64-bit duration range.
-- Streamed uptime values and uptime log prefixes use `roo_time::FormatUptime`,
-  retaining `S+` (or `S-`) and replacing days with total hours:
-  `S+HH:MM:SS.ffffff`. Uptime log prefixes default to
-  `kUptimeClockMicrosFormat` (`S%+%H:%M:%S.%f`). Configure the complete format
-  with `SET_ROO_FLAG(roo_logging_uptime_format, "S%+%T%F")` or another duration
-  format. The format controls markers and sign placement; choosing a duration
-  constant without a marker omits S+/S-.
-  The format is borrowed: use a literal, a named constant, or storage that
-  outlives its use. Serialize flag updates with logging. Null or invalid
-  formats fall back to the default. Wall-clock timestamps and streamed body
-  values do not use this flag.
-- Format durations directly into the remaining stream buffer without heap
-  allocation. Bound printf cursor advancement so oversized configured prefixes
-  truncate safely before subsequent prefix fields are appended.
-- The Bazel and PlatformIO manifests require `roo_time` 2.1.0 and
-  `roo_threads` 1.3.0 or later.
+- Added a framework-independent, bounded logging stream for native Pico SDK, ESP-IDF, and plain host builds, plus a bare-metal RP2040 USB serial example in `examples/pico_sdk`. The stream supports signed and unsigned 64-bit integers and safely handles zero-capacity buffers. Arduino keeps its `Print`-compatible stream.
+- Ordinary logs now use `stderr` on all platforms. On ESP, logs use the ROM console before FreeRTOS starts, including when a task is already queued or log prefixes are disabled. Once the scheduler starts, `stderr` respects USB/JTAG routing.
+- Streamed pointers now use lowercase `0x` hexadecimal on all platforms, with `0x0` for null. Update parsers that expect spellings such as `(nil)`. Wall-clock timestamps, colored diagnostics, Linux stack-trace lines, and legacy ESP backtraces are written without `printf`.
+- Streamed floating-point values retain up to six significant digits and truncate to the available buffer space. IEEE binary32 and binary64 `double` use exact integer conversion without `printf`, heap allocation, large lookup tables, or a C++17 requirement. Other `double` representations retain the `printf` fallback.
+- Durations and normalized duration components use `roo_time::kDurationClockFormat`, with correct leading fractional zeros and support for the full signed 64-bit duration range. Formatting writes directly into the remaining buffer without heap allocation, and oversized formatted fields truncate safely.
+- Streamed uptime and uptime prefixes use `roo_time::FormatUptime` with total hours and `S+` or `S-` markers. Prefixes default to `S+HH:MM:SS.ffffff` (`S%+%H:%M:%S.%f`). Use `SET_ROO_FLAG(roo_logging_uptime_format, "S%+%T%F")` or another duration format to control the full prefix timestamp, including markers and sign placement. Use persistent storage for the format and serialize updates with logging. Null or invalid formats fall back to the default. The flag applies only to uptime prefixes.
+- Expanded CI to all nine emulation profiles, covering Arduino and ESP-IDF on ESP32, ESP32-S3, and ESP32-C3, plus native Pico SDK and Arduino-Pico with and without FreeRTOS. Updated Bazel and CI to `roo_testing` 2.6.0 and added Bazel’s `platforms` 1.1.0 dependency.
+- Updated Bazel and PlatformIO dependencies to `roo_backport` 1.2.5, `roo_flags` 1.2.6, `roo_time` 2.2.0, and `roo_threads` 1.3.1. PlatformIO uses these as minimum versions.
 
 ---
 
