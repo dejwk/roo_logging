@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <cstdlib>
 #include <string>
 
 #include "gtest/gtest.h"
@@ -6,6 +7,12 @@
 #include "roo_logging/internal/stacktrace_format.h"
 #include "roo_logging/stacktrace.h"
 #include "roo_logging/stderr.h"
+
+#if defined(ESP_PLATFORM) && !defined(ARDUINO) && GTEST_HAS_DEATH_TEST
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "roo_logging/log_message.h"
+#endif
 
 namespace roo_logging {
 namespace {
@@ -57,6 +64,32 @@ TEST_F(LoggingStderrTest, StaticInitializerUsesStderrOnHost) {
   testing::internal::CaptureStderr();
   MaybeLogToStderr(ROO_LOGGING_WARNING, "early\n", 6, true);
   EXPECT_EQ("\033[0;33mearly\n\033[m", testing::internal::GetCapturedStderr());
+}
+#endif
+
+#if defined(ESP_PLATFORM) && !defined(ARDUINO) && GTEST_HAS_DEATH_TEST
+// Verifies a task queued before the scheduler starts is omitted from the
+// startup prefix. The child exits with the queued task and its scheduler state.
+TEST(LoggingStartup, IgnoresTaskQueuedBeforeSchedulerStarts) {
+  EXPECT_EXIT(
+      {
+        if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED)
+          std::_Exit(1);
+        TaskHandle_t pending_task = nullptr;
+        const BaseType_t result =
+            xTaskCreate([](void*) {}, "pending", configMINIMAL_STACK_SIZE,
+                        nullptr, tskIDLE_PRIORITY, &pending_task);
+        if (result != pdPASS || xTaskGetCurrentTaskHandle() != pending_task) {
+          std::_Exit(2);
+        }
+
+        SET_ROO_FLAG(roo_logging_prefix, true);
+        SET_ROO_FLAG(roo_logging_wall_time_clock, nullptr);
+        LogMessage("startup.cpp", 42).stream() << "before scheduler";
+        std::_Exit(0);
+      },
+      testing::ExitedWithCode(0),
+      R"(IS[+][0-9:.]+ startup[.]cpp:42\] before scheduler)");
 }
 #endif
 

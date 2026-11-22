@@ -214,7 +214,18 @@ void LogMessage::Init(const char* file, int line, LogSeverity severity,
   data_->basename_ = const_basename(file);
   data_->fullname_ = file;
   data_->has_been_flushed_ = false;
+#if defined(__FREERTOS) || defined(ESP_PLATFORM)
+  TaskHandle_t current_task = xTaskGetCurrentTaskHandle();
+#if INCLUDE_xTaskGetSchedulerState == 1
+  // Startup can create a task before the scheduler actually runs it.
+  if (xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED) {
+    current_task = nullptr;
+  }
+#endif
+  data_->from_static_initializer_ = current_task == nullptr;
+#else
   data_->from_static_initializer_ = false;
+#endif
 
   if (GET_ROO_FLAG(roo_logging_prefix)) {
     stream() << LogSeverityNames[severity][0];
@@ -233,13 +244,9 @@ void LogMessage::Init(const char* file, int line, LogSeverity severity,
       stream() << dt;
       stream().write(' ');
     }
-#if (defined __FREERTOS || defined ESP_PLATFORM)
-    TaskHandle_t tHandle = xTaskGetCurrentTaskHandle();
-
-    // Can be null if called from a static initializer.
-    if (tHandle != nullptr) {
-      char* tName = pcTaskGetName(tHandle);
-      stream() << tName << '(' << tHandle;
+#if defined(__FREERTOS) || defined(ESP_PLATFORM)
+    if (current_task != nullptr) {
+      stream() << pcTaskGetName(current_task) << '(' << current_task;
 #if (defined portGET_CORE_ID)
       if (GET_ROO_FLAG(roo_logging_freertos_log_core_id)) {
         BaseType_t core_id = portGET_CORE_ID();
@@ -247,8 +254,6 @@ void LogMessage::Init(const char* file, int line, LogSeverity severity,
       }
 #endif
       stream() << ") ";
-    } else {
-      data_->from_static_initializer_ = true;
     }
 #elif (defined __linux__)
     {
