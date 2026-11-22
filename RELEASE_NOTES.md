@@ -1,3 +1,11 @@
+# roo_logging 1.6.1
+
+- Fixed Arduino dependency discovery by including `roo_time.h` directly so the build can locate `roo_time` when logging code uses `roo_time/format.h`.
+- Updated Bazel and PlatformIO dependencies to `roo_backport` 1.3.0, `roo_time` 2.2.1, and `roo_threads` 1.4.0. These are minimum versions in PlatformIO.
+- Updated Bazel and CI to `roo_testing` 2.7.0.
+
+---
+
 # roo_logging 1.6.0
 
 - Added a framework-independent, bounded logging stream for native Pico SDK, ESP-IDF, and plain host builds, plus a bare-metal RP2040 USB serial example in `examples/pico_sdk`. The stream supports signed and unsigned 64-bit integers and safely handles zero-capacity buffers. Arduino keeps its `Print`-compatible stream.
