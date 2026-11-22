@@ -499,6 +499,33 @@ formatter. Arduino retains its Print-compatible stream; IDF shares the portable
 formatter through the existing EspidfLogStream name. Zero capacity accepts no
 output, and integer formatting supports signed and unsigned 64-bit values.
 
+Native Pico SDK example
+-----------------------
+
+The `Pico SDK example <examples/pico_sdk>`__ builds a bare-metal RP2040 program
+that writes a log line to the USB serial console every second. Set up the
+`Pico SDK and ARM toolchain <https://github.com/raspberrypi/pico-sdk#quick-start-your-own-project>`__
+and initialize the SDK submodules for USB support. Use local checkouts of
+roo_backport (1.2.4 or later), roo_flags (1.2.5 or later), roo_time (2.1.0 or
+later), and roo_threads (1.3.0 or later).
+
+From the roo_logging root, configure and build for the original Raspberry Pi
+Pico. Set ``ROO_LIBRARIES_DIR`` to the directory containing those four checkouts.
+
+.. code-block:: sh
+
+   cmake -S examples/pico_sdk -B /tmp/roo-logging-pico \
+     -DPICO_SDK_PATH=/path/to/pico-sdk -DPICO_BOARD=pico \
+     -DROO_LIBRARIES_DIR=/path/to/roo-libraries
+   cmake --build /tmp/roo-logging-pico
+
+Copy ``/tmp/roo-logging-pico/roo_logging_pico.uf2`` to the Pico in BOOTSEL
+mode. Open its USB serial port and look for ``Pico SDK logging`` after
+the uptime and source location. In your own firmware, call
+``stdio_init_all()`` before logging and enable the SDK's USB or UART stdio
+backend for your console.
+
+
 Floating-point logging
 ----------------------
 
