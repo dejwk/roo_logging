@@ -40,11 +40,11 @@
 
 #include <execinfo.h>
 
+#include "roo_logging/internal/stacktrace_format.h"
 #include "roo_logging/stream.h"
 
 namespace roo_logging {
-
-// int GetStackTrace(void** result, int max_depth, int skip_count) { return 0; }
+namespace internal {
 
 int GetStackTrace(void** result, int max_depth, int skip_count) {
   static const int kStackLength = 64;
@@ -61,10 +61,10 @@ int GetStackTrace(void** result, int max_depth, int skip_count) {
   return result_count;
 }
 
-namespace {
-
-// Keeps stack addresses right-aligned to the historical pointer field width.
-void AppendPC(DefaultLogStream& stream, const char* prefix, void* pc) {
+void FormatStackTraceLine(char* buffer, size_t capacity, const char* prefix,
+                          const void* pc, const char* symbol) {
+  if (capacity == 0) return;
+  DefaultLogStream stream(buffer, capacity);
   uintptr_t value = reinterpret_cast<uintptr_t>(pc);
   size_t digits = 1;
   while (value >= 16) {
@@ -74,15 +74,19 @@ void AppendPC(DefaultLogStream& stream, const char* prefix, void* pc) {
   stream << prefix << "@ ";
   for (size_t i = digits; i < 2 * sizeof(void*); ++i) stream.write(' ');
   stream << pc;
+  if (symbol != nullptr) stream << "  " << symbol;
+  stream << '\n';
+  buffer[stream.pcount()] = '\0';
 }
+
+}  // namespace internal
+
+namespace {
 
 void DumpPC(DebugWriter* writerfn, void* arg, void* pc,
             const char* const prefix) {
   char buf[100];
-  DefaultLogStream stream(buf, sizeof(buf));
-  AppendPC(stream, prefix, pc);
-  stream << '\n';
-  buf[stream.pcount()] = '\0';
+  internal::FormatStackTraceLine(buf, sizeof(buf), prefix, pc, nullptr);
   writerfn(buf, arg);
 }
 
@@ -99,10 +103,7 @@ static void DumpPCAndSymbol(DebugWriter* writerfn, void* arg, void* pc,
     symbol = tmp;
   }
   char buf[1024];
-  DefaultLogStream stream(buf, sizeof(buf));
-  AppendPC(stream, prefix, pc);
-  stream << "  " << symbol << '\n';
-  buf[stream.pcount()] = '\0';
+  internal::FormatStackTraceLine(buf, sizeof(buf), prefix, pc, symbol);
   writerfn(buf, arg);
 }
 #endif
@@ -113,8 +114,8 @@ static void DumpPCAndSymbol(DebugWriter* writerfn, void* arg, void* pc,
 void DumpStackTrace(int skip_count, DebugWriter* writerfn, void* arg) {
   // Print stack trace
   void* stack[32];
-  int depth =
-      GetStackTrace(stack, sizeof(stack) / sizeof(void*), skip_count + 1);
+  int depth = internal::GetStackTrace(stack, sizeof(stack) / sizeof(void*),
+                                      skip_count + 1);
   for (int i = 0; i < depth; i++) {
 #if defined(ROO_LOGGING_HAVE_SYMBOLIZE)
     if (ROO_LOGGING_SYMBOLIZE_STACKTRACE) {

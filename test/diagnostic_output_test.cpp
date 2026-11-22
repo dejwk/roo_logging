@@ -1,7 +1,9 @@
+#include <cstdint>
 #include <string>
 
 #include "gtest/gtest.h"
 #include "roo_logging/config.h"
+#include "roo_logging/internal/stacktrace_format.h"
 #include "roo_logging/stacktrace.h"
 #include "roo_logging/stderr.h"
 
@@ -63,31 +65,31 @@ void CaptureStackLine(const char* text, void* output) {
   static_cast<std::string*>(output)->append(text);
 }
 
-// Verifies stack diagnostics retain complete lines and right-aligned pointer
-// fields when addresses and symbols are assembled without snprintf.
+// Verifies exact spacing, pointer text, symbol separation, and line endings
+// with a known address, regardless of whether this build can unwind.
 TEST(LoggingStackTrace, FormatsAlignedAddresses) {
+  const void* pc = reinterpret_cast<const void*>(uintptr_t{0xabc});
+  const std::string address =
+      "    @ " + std::string(2 * sizeof(void*) - 3, ' ') + "0xabc";
+  char text[100];
+  internal::FormatStackTraceLine(text, sizeof(text), "    ", pc, nullptr);
+  EXPECT_EQ(address + "\n", text);
+  internal::FormatStackTraceLine(text, sizeof(text), "    ", pc, "Example()");
+  EXPECT_EQ(address + "  Example()\n", text);
+}
+
+// Verifies that the real stack walker sends formatted frames to its writer.
+TEST(LoggingStackTrace, DumpsFramesWhenUnwindingIsAvailable) {
+  void* frame;
+  if (internal::GetStackTrace(&frame, 1, 0) == 0) {
+    GTEST_SKIP() << "This build cannot unwind the test stack";
+  }
+
   std::string output;
   DumpStackTrace(0, CaptureStackLine, &output);
   ASSERT_FALSE(output.empty());
-  size_t start = 0;
-  while (start < output.size()) {
-    const size_t end = output.find('\n', start);
-    ASSERT_NE(std::string::npos, end);
-    const std::string line = output.substr(start, end - start);
-    ASSERT_EQ("    @ ", line.substr(0, 6));
-    const size_t address = line.find("0x", 6);
-    ASSERT_NE(std::string::npos, address);
-    EXPECT_EQ(std::string(address - 6, ' '), line.substr(6, address - 6));
-    size_t digit_end = address + 2;
-    while (digit_end < line.size() &&
-           ((line[digit_end] >= '0' && line[digit_end] <= '9') ||
-            (line[digit_end] >= 'a' && line[digit_end] <= 'f'))) {
-      ++digit_end;
-    }
-    EXPECT_GT(digit_end, address + 2);
-    EXPECT_EQ(6 + 2 + 2 * sizeof(void*), digit_end);
-    start = end + 1;
-  }
+  EXPECT_EQ(0u, output.find("    @ "));
+  EXPECT_EQ('\n', output.back());
 }
 #endif
 
